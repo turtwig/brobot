@@ -1,4 +1,4 @@
-#include "Storage.h"
+#include "../include/Storage.h"
 
 Storage::Storage(const std::string& fname) {
     file.open(fname.c_str(), std::ios::in);

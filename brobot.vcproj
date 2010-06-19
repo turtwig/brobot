@@ -172,31 +172,31 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\brobot.cpp"
+				RelativePath=".\src\brobot.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Core.cpp"
+				RelativePath=".\src\Core.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\helper.cpp"
+				RelativePath=".\src\helper.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\main.cpp"
+				RelativePath=".\src\main.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\perl.cpp"
+				RelativePath=".\src\perl.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\perlxsi.cpp"
+				RelativePath=".\src\perlxsi.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Storage.cpp"
+				RelativePath=".\src\Storage.cpp"
 				>
 			</File>
 		</Filter>
@@ -206,43 +206,43 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Args.h"
+				RelativePath=".\include\Args.h"
 				>
 			</File>
 			<File
-				RelativePath=".\BaseModule.h"
+				RelativePath=".\include\BaseModule.h"
 				>
 			</File>
 			<File
-				RelativePath=".\BaseSocket.h"
+				RelativePath=".\include\BaseSocket.h"
 				>
 			</File>
 			<File
-				RelativePath=".\brobot.h"
+				RelativePath=".\include\brobot.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Core.h"
+				RelativePath=".\include\Core.h"
 				>
 			</File>
 			<File
-				RelativePath=".\IRC.h"
+				RelativePath=".\include\IRC.h"
 				>
 			</File>
 			<File
-				RelativePath=".\perl.h"
+				RelativePath=".\include\perl.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Socket.h"
+				RelativePath=".\include\Socket.h"
 				>
 			</File>
 			<File
-				RelativePath=".\SSLSocket.h"
+				RelativePath=".\include\SSLSocket.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Storage.h"
+				RelativePath=".\include\Storage.h"
 				>
 			</File>
 		</Filter>

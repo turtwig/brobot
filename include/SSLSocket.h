@@ -1,7 +1,7 @@
 #ifndef SSLSOCKET_H_INCLUDED
 #define SSLSOCKET_H_INCLUDED
 
-#include "BaseSocket.h"
+#include "../include/BaseSocket.h"
 #include <boost/asio/ssl.hpp>
 
 using boost::asio::ip::tcp;

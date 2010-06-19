@@ -1,7 +1,7 @@
 #include <boost/foreach.hpp>
 #include <iostream>
-#include "brobot.h"
-#include "perl.h"
+#include "../include/brobot.h"
+#include "../include/perl.h"
 
 EXTERN_C void xs_init (pTHX); // From perlxsi.c
 

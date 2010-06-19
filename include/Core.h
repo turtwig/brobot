@@ -1,9 +1,9 @@
 #ifndef CORE_H_INCLUDED
 #define CORE_H_INCLUDED
 
-#include "BaseModule.h"
-#include "Args.h"
-#include "brobot.h"
+#include "../include/BaseModule.h"
+#include "../include/Args.h"
+#include "../include/brobot.h"
 #include <string>
 #include <boost/regex.hpp>
 

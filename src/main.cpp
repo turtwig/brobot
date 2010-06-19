@@ -1,7 +1,7 @@
 #include <iostream>
-#include "brobot.h"
-#include "Core.h"
-#include "perl.h"
+#include "../include/brobot.h"
+#include "../include/Core.h"
+#include "../include/perl.h"
 
 Brobot* g_bro;
 

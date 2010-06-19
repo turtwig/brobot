@@ -1,4 +1,4 @@
-#include "Core.h"
+#include "../include/Core.h"
 #include <iostream>
 
 void CoreModule::onLoad(Brobot* bro) {

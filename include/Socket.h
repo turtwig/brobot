@@ -1,7 +1,7 @@
 #ifndef SOCKET_H_INCLUDED
 #define SOCKET_H_INCLUDED
 
-#include "BaseSocket.h"
+#include "../include/BaseSocket.h"
 
 using boost::asio::ip::tcp;
 
