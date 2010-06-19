@@ -199,6 +199,10 @@
 				RelativePath=".\src\Storage.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\uno.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -243,6 +247,10 @@
 			</File>
 			<File
 				RelativePath=".\include\Storage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\uno.h"
 				>
 			</File>
 		</Filter>
