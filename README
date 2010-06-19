@@ -1,0 +1,5 @@
+this is a nice boat
+
+i would like to mention how to compile this but i'm not sure myself
+the .sln file should work if you're in windows otherwise idk idc
+links against perl boost and openssl
