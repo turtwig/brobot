@@ -250,7 +250,7 @@ void Uno::endGame(Brobot* bro) {
 };
 
 void Uno::startGame(Brobot* bro, Args& args) {
-	if (args[5] != ".start" || args[4] != channel)
+	if (started != 1 || args[5] != ".start" || args[4] != channel)
 		return;
 	if (started == 2) {
 		bro->irc->privmsg(channel, "Game in "+channel+" is already in progress!");
@@ -332,12 +332,8 @@ void Uno::nextTurn(Brobot* bro) {
 
 
 void Uno::joinHook(Brobot* bro, Args& args) {
-	if (args[5] != ".join" || args[4] != channel)
+	if (started == 0 || args[5] != ".join" || args[4] != channel)
 		return;
-	if (started == 0) {
-		bro->irc->privmsg(args[4], "No game in "+args[4]+" right now! Type .uno to start one!");
-		return;
-	}
 	if (started == 2) {
 		bro->irc->privmsg(args[4], "Game in "+args[4]+" already in progress!");
 		return;
@@ -372,12 +368,8 @@ void Uno::joinHook(Brobot* bro, Args& args) {
 };
 
 void Uno::listPlayers(Brobot* bro, Args& args) {
-	if (args[5] != ".players" || args[4] != channel)
+	if (started == 0 || args[5] != ".players" || args[4] != channel)
 		return;
-	if (started == 0) {
-		bro->irc->privmsg(args[4], "No game in "+args[4]+" right now! Type .uno to start one!");
-		return;
-	}
 	std::string pstring;
 	BOOST_FOREACH( Player p, players)
 		pstring += p.nick+" ";
