@@ -2,7 +2,6 @@
 #define UNO_H_INCLUDED
 #include <string>
 #include <vector>
-#include <cstdlib> // for rand()
 #include <algorithm>
 #include "../include/BaseModule.h"
 #include "../include/Args.h"
@@ -14,7 +13,7 @@ enum Cardtype { red, blue, green, yellow, wild };
 enum Cardattr { none, skip, reverse, drawtwo, drawfour };
 
 struct Card {
-	short int number;
+	short int number; // -1 = special card
 	Cardtype type;
 	Cardattr attr;
 	std::string ascii[14];
@@ -31,13 +30,14 @@ struct Player {
 
 class Uno : public BaseModule {
 	std::vector<Player> players;
+	std::vector<std::string> dropped_players;
 	std::vector<Card> deck;
-	Card discard;
+	std::vector<Card> discard;
 	std::string channel;
 	std::vector<Player>::iterator current_player;
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
 	public:
-	Uno() : started(0), discard(0, red, none, "") {};
+	Uno() : started(0) {};
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
 	void reverse() { std::reverse(players.begin(), players.end()); };
@@ -51,6 +51,10 @@ class Uno : public BaseModule {
 	void partHook(Brobot* bro, Args& args);
 	void quitHook(Brobot* bro, Args& args);
 	void dropPlayer(Brobot* bro, Args& args);
+	void endGame(Brobot* bro);
+	void startGame(Brobot* bro, Args& args); // handles .start rather than .uno
+	void showDiscard(Brobot* bro, Args& args);
+	void nextTurn(Brobot* bro);
 };
 
 // Cards definition
@@ -113,11 +117,5 @@ const Card _reverseyellow(-1, yellow, reverse, "reverseyellow.txt");
 // Wilds
 const Card _wild(-1, wild, none, "wild.txt");
 const Card _p4wild(-1, wild, drawfour, "wild+4.txt");
-
-const Card __cards[] = { _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered,
-                          _0blue, _1blue, _2blue, _3blue, _4blue, _5blue, _6blue, _7blue, _8blue, _9blue, _p2blue, _skipblue, _reverseblue, 
-						  _0green, _1green, _2green, _3green, _4green, _5green, _6green, _7green, _8green, _9green, _p2green, _skipgreen, _reversegreen, 
-						  _0yellow, _1yellow, _2yellow, _3yellow, _4yellow, _5yellow, _6yellow, _7yellow, _8yellow, _9yellow, _p2yellow, _skipyellow, _reverseyellow, 
-						  _wild, _p4wild }; // All cards
 
 #endif // UNO_H_INCLUDED

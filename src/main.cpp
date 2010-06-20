@@ -1,6 +1,4 @@
 #include <iostream>
-#include <cstdlib>
-#include <ctime>
 #include "../include/brobot.h"
 #include "../include/Core.h"
 #include "../include/uno.h"
@@ -13,7 +11,6 @@ extern void PerlTest(Brobot* bro, Args& args);
 
 int main(int argc, char** argv, char** env) {
 	PERL_SYS_INIT3(&argc, &argv, &env);
-	std::srand(std::time(NULL));
     try {
         boost::asio::io_service io_service;
         boost::asio::ssl::context context(io_service, boost::asio::ssl::context::sslv23);
