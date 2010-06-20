@@ -1,7 +1,5 @@
 #include "..\include\uno.h"
 #include <fstream>
-#include <cstdlib>
-#include "..\include\brobot.h"
 
 Card::Card(short int num, Cardtype col, Cardattr spec, const std::string& fname) : number(num), type(col), attr(spec) {
 	std::fstream file;
@@ -14,7 +12,7 @@ Card::Card(short int num, Cardtype col, Cardattr spec, const std::string& fname)
 	file.close();
 }
 
-void printCard(Brobot* bro, const std::string& target, bool notice, Card card) { // single card
+void Uno::printCard(Brobot* bro, const std::string& target, bool notice, Card card) { // single card
 	for (int i = 0; i < 14; ++i) {
 		if (notice) {
 			bro->irc->notice(target, card.ascii[i]);
@@ -24,11 +22,11 @@ void printCard(Brobot* bro, const std::string& target, bool notice, Card card) {
 	}
 }
 
-void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards) { // multiple cards
+void Uno::printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards) { // multiple cards
 	while(!cards.empty()) {
 		std::vector<Card>::iterator it;
-		if (cards.size() > 8) {
-			it = cards.begin()+8;
+		if (cards.size() > 5) {
+			it = cards.begin()+5;
 		} else {
 			it = cards.end();
 		}
@@ -57,32 +55,90 @@ void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<
 	}
 }
 
+void Uno::onLoad(Brobot* bro) {
+	bro->hook("[uno] gameStart", "OnPRIVMSG", boost::bind(&Uno::gameStart, this, bro, _1));
+	bro->hook("[uno] joinHook", "OnPRIVMSG", boost::bind(&Uno::joinHook, this, bro, _1));
+	bro->hook("[uno] listPlayers", "OnPRIVMSG", boost::bind(&Uno::listPlayers, this, bro, _1));
+	bro->hook("[uno] nickHook", "OnNICK", boost::bind(&Uno::nickHook, this, bro, _1));
+}
 
-std::vector<Player> players;
+void Uno::onUnload(Brobot* bro) {
+	bro->unhook("[uno] gameStart", "OnPRIVMSG");
+	bro->unhook("[uno] joinHook", "OnPRIVMSG");
+	bro->unhook("[uno] listPlayers", "OnPRIVMSG");
+	bro->unhook("[uno] nickHook", "OnNICK");
+}
 
-void Unotest(Brobot* bro, Args& args) {
-	if (args[5].substr(0,5) == ".draw") {
-		init();
-		std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
-		if (it == players.end()) {
-			bro->irc->privmsg(args[4], "You are not in the game.");
-			return;
-		} else {
-			int i = rand() % 54; // 0 -> 53
-			bro->irc->privmsg(args[4], "You drew:");
-			printCard(bro, args[4], false, __cards[i]);
-			it->hand.push_back(__cards[i]);
-		}
+void Uno::gameStart(Brobot* bro, Args& args) {
+	if (args[5] != ".uno" || args[4][0] != '#')
+		return;
+	if (started != 0) {
+		bro->irc->privmsg(args[4], "Game in "+channel+" already in progress!");
+		return;
 	}
-	if (args[5].substr(0,4) != ".uno")
-		return; // the privmsg was not aimed at us
+	started = 1;
+	deck.clear();
+	for(int i = 0; i < 108; ++i) {
+		deck.push_back(__cards[rand()%54]);
+	}
+	channel = args[4];
+	bro->irc->privmsg(args[4], "Starting 4U8N3O12! game in "+args[4]+"!");
+	bro->irc->privmsg(args[4], "Say .join to join in and .start to start the game!");
+	Player p(args[1]);
+	for (int i = 0; i < 7; ++i) {
+		p.hand.push_back(deck.back());
+		deck.pop_back();
+	}
+	players.push_back(p);
+	printCard(bro, args[1], true, p.hand);
+}
 
+void Uno::joinHook(Brobot* bro, Args& args) {
+	if (args[5] != ".join" || args[4] != channel)
+		return;
+	if (started == 0) {
+		bro->irc->privmsg(args[4], "No game in "+args[4]+" right now! Type .uno to start one!");
+		return;
+	}
+	if (started == 2) {
+		bro->irc->privmsg(args[4], "Game in "+args[4]+" already in progress!");
+		return;
+	}
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
-	if (it == players.end()) {
-		players.push_back(Player(args[1]));
-		bro->irc->privmsg(args[4], "Player added.");
-	} else {
-		bro->irc->notice(args[1], "Your hand:");
+	if (it != players.end()) {
+		bro->irc->privmsg(args[4], "You are already in the game!");
+		bro->irc->notice(args[1], "Your cards are:");
 		printCard(bro, args[1], true, it->hand);
+		return;
 	}
+	Player p(args[1]);
+	for (int i = 0; i < 7; ++i) {
+		p.hand.push_back(deck.back());
+		deck.pop_back();
+	}
+	players.push_back(p);
+	bro->irc->privmsg(args[4], args[1]+" has joined this game of 4U8N3O12!");
+	bro->irc->notice(args[1], "Your cards are:");
+	printCard(bro, args[1], true, p.hand);
+}
+
+void Uno::listPlayers(Brobot* bro, Args& args) {
+	if (args[5] != ".players" || args[4] != channel)
+		return;
+	if (started == 0) {
+		bro->irc->privmsg(args[4], "No game in "+args[4]+" right now! Type .uno to start one!");
+		return;
+	}
+	std::string pstring;
+	BOOST_FOREACH( Player p, players)
+		pstring += p.nick+" ";
+	bro->irc->privmsg(args[4], "Playing order: "+pstring);
+};
+
+void Uno::nickHook(Brobot* bro, Args& args) {
+	if (started == 0)
+		return; // game hasn't started
+	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
+	if (it != players.end())
+		it->nick = args[2];
 }

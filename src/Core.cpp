@@ -6,6 +6,7 @@ void CoreModule::onLoad(Brobot* bro) {
     bro->addParser("ping", boost::bind(&CoreModule::ping, this, bro, _1));
     bro->addParser("numerics", boost::bind(&CoreModule::numerics, this, bro, _1));
     bro->addParser("commands", boost::bind(&CoreModule::commands, this, bro, _1));
+	bro->addParser("nick", boost::bind(&CoreModule::nick, this, bro, _1));
     // Hooks
     bro->hook("[core] Ping", "OnPING", boost::bind(&CoreModule::pingHook, this, bro, _1));
 };
@@ -15,6 +16,7 @@ void CoreModule::onUnload(Brobot* bro) {
     bro->delParser("commands");
     bro->delParser("numerics");
     bro->delParser("ping");
+	bro->delParser("nick");
     // Hooks
     bro->unhook("[core] Ping", "OnPING");
 };
@@ -51,6 +53,19 @@ void CoreModule::commands(Brobot* bro, const std::string& str) {
         return; // nothing else to do
     Args arg;
     bro->runHooks("On" + match[4], arg % str % match[1] % match[2] % match[3] % match[5] % match[6]);
+};
+
+/* Handles nick changes
+ * Hook is OnNICK
+ * a[0] is the raw string, a[1] is the original nick, a[2] is the new nick
+ */
+void CoreModule::nick(Brobot* bro, const std::string& str) {
+	static const boost::regex expr("^:(.+?)!.+?@.+? NICK :(.+?)$"); // matches NICK!IDENT@HOST NICK :NEWNICK
+	boost::cmatch match;
+	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
+		return; // nothing else to do
+	Args arg;
+	bro->runHooks("OnNICK", arg % str % match[1] % match[2]);
 };
 
 /* Handles PING

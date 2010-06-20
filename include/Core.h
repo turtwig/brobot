@@ -13,6 +13,7 @@ class CoreModule : public BaseModule {
     void onUnload(Brobot* bro);
     void numerics(Brobot* bro, const std::string& str);
     void commands(Brobot* bro, const std::string& str);
+	void nick(Brobot* bro, const std::string& str);
     void ping(Brobot* bro, const std::string& str);
     void pingHook(Brobot* bro, Args& arg);
 };

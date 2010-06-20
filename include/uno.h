@@ -1,5 +1,12 @@
+#ifndef UNO_H_INCLUDED
+#define UNO_H_INCLUDED
 #include <string>
 #include <vector>
+#include <cstdlib> // for rand()
+#include <algorithm>
+#include "../include/BaseModule.h"
+#include "../include/Args.h"
+#include "../include/brobot.h"
 
 const std::string ascii_dir = "C:\\Users\\Admin\\Desktop\\ascii\\uno\\";
 
@@ -20,6 +27,28 @@ struct Player {
 	std::string nick;
 	Player(const std::string& n) : nick(n) {};
 	bool operator==(const std::string& n) { return n == nick; };
+};
+
+class Uno : public BaseModule {
+	std::vector<Player> players;
+	std::vector<Card> deck;
+	Card discard;
+	std::string channel;
+	std::vector<Player>::iterator current_player;
+	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
+	public:
+	Uno() : started(0), discard(0, red, none, "") {};
+	void onLoad(Brobot* bro);
+	void onUnload(Brobot* bro);
+	void setchannel(const std::string chan) { channel = chan; };
+	void reverse() { std::reverse(players.begin(), players.end()); };
+	void skip() { if (++current_player == players.end()) current_player = players.begin(); };
+	void printCard(Brobot* bro, const std::string& target, bool notice, Card card);
+	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
+	void gameStart(Brobot* bro, Args& args);
+	void joinHook(Brobot* bro, Args& args);
+	void listPlayers(Brobot* bro, Args& args);
+	void nickHook(Brobot* bro, Args& args);
 };
 
 // Cards definition
@@ -50,7 +79,7 @@ const Card _8blue(8, blue, none, "8blue.txt");
 const Card _9blue(9, blue, none, "9blue.txt");
 const Card _p2blue(-1, blue, drawtwo, "+2blue.txt");
 const Card _skipblue(-1, blue, skip, "skipblue.txt");
-Card _reverseblue(-1, blue, reverse, "reverseblue.txt");
+const Card _reverseblue(-1, blue, reverse, "reverseblue.txt");
 // Green
 const Card _0green(0, green, none, "0green.txt");
 const Card _1green(1, green, none, "1green.txt");
@@ -83,64 +112,10 @@ const Card _reverseyellow(-1, yellow, reverse, "reverseyellow.txt");
 const Card _wild(-1, wild, none, "wild.txt");
 const Card _p4wild(-1, wild, drawfour, "wild+4.txt");
 
-std::vector<Card> __cards;
-bool ohmygod = false;
-void init() {
-	if(ohmygod)
-		return;
-__cards.push_back(_0red);
-__cards.push_back(_1red);
-__cards.push_back(_2red);
-__cards.push_back(_3red);
-__cards.push_back(_4red);
-__cards.push_back(_5red);
-__cards.push_back(_6red);
-__cards.push_back(_7red);
-__cards.push_back(_8red);
-__cards.push_back(_9red);
-__cards.push_back(_p2red);
-__cards.push_back(_skipred);
-__cards.push_back(_reversered);
-__cards.push_back(_0blue);
-__cards.push_back(_1blue);
-__cards.push_back(_2blue);
-__cards.push_back(_3blue);
-__cards.push_back(_4blue);
-__cards.push_back(_5blue);
-__cards.push_back(_6blue);
-__cards.push_back(_7blue);
-__cards.push_back(_8blue);
-__cards.push_back(_9blue);
-__cards.push_back(_p2blue);
-__cards.push_back(_skipblue);
-__cards.push_back(_reverseblue);
-__cards.push_back(_0green);
-__cards.push_back(_1green);
-__cards.push_back(_2green);
-__cards.push_back(_3green);
-__cards.push_back(_4green);
-__cards.push_back(_5green);
-__cards.push_back(_6green);
-__cards.push_back(_7green);
-__cards.push_back(_8green);
-__cards.push_back(_9green);
-__cards.push_back(_p2green);
-__cards.push_back(_skipgreen);
-__cards.push_back(_reversegreen);
-__cards.push_back(_0yellow);
-__cards.push_back(_1yellow);
-__cards.push_back(_2yellow);
-__cards.push_back(_3yellow);
-__cards.push_back(_4yellow);
-__cards.push_back(_5yellow);
-__cards.push_back(_6yellow);
-__cards.push_back(_7yellow);
-__cards.push_back(_8yellow);
-__cards.push_back(_9yellow);
-__cards.push_back(_p2yellow);
-__cards.push_back(_skipyellow);
-__cards.push_back(_reverseyellow);
-__cards.push_back(_wild);
-__cards.push_back(_p4wild);
-ohmygod = true;
-}
+const Card __cards[] = { _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered,
+                          _0blue, _1blue, _2blue, _3blue, _4blue, _5blue, _6blue, _7blue, _8blue, _9blue, _p2blue, _skipblue, _reverseblue, 
+						  _0green, _1green, _2green, _3green, _4green, _5green, _6green, _7green, _8green, _9green, _p2green, _skipgreen, _reversegreen, 
+						  _0yellow, _1yellow, _2yellow, _3yellow, _4yellow, _5yellow, _6yellow, _7yellow, _8yellow, _9yellow, _p2yellow, _skipyellow, _reverseyellow, 
+						  _wild, _p4wild }; // All cards
+
+#endif // UNO_H_INCLUDED
