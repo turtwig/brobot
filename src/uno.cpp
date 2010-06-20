@@ -10,7 +10,7 @@ Card::Card(short int num, Cardtype col, Cardattr spec, const std::string& fname)
         }
 	}
 	file.close();
-}
+};
 
 void Uno::printCard(Brobot* bro, const std::string& target, bool notice, Card card) { // single card
 	for (int i = 0; i < 14; ++i) {
@@ -20,7 +20,7 @@ void Uno::printCard(Brobot* bro, const std::string& target, bool notice, Card ca
 			bro->irc->privmsg(target, card.ascii[i]);
 		}
 	}
-}
+};
 
 void Uno::printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards) { // multiple cards
 	while(!cards.empty()) {
@@ -53,21 +53,27 @@ void Uno::printCard(Brobot* bro, const std::string& target, bool notice, std::ve
 			}
 		}
 	}
-}
+};
 
 void Uno::onLoad(Brobot* bro) {
 	bro->hook("[uno] gameStart", "OnPRIVMSG", boost::bind(&Uno::gameStart, this, bro, _1));
 	bro->hook("[uno] joinHook", "OnPRIVMSG", boost::bind(&Uno::joinHook, this, bro, _1));
 	bro->hook("[uno] listPlayers", "OnPRIVMSG", boost::bind(&Uno::listPlayers, this, bro, _1));
 	bro->hook("[uno] nickHook", "OnNICK", boost::bind(&Uno::nickHook, this, bro, _1));
-}
+	bro->hook("[uno] partHook", "OnPART", boost::bind(&Uno::partHook, this, bro, _1));
+	bro->hook("[uno] quitHook", "OnQUIT", boost::bind(&Uno::quitHook, this, bro, _1));
+	bro->hook("[uno] dropPlayer", "OnPRIVMSG", boost::bind(&Uno::dropPlayer, this, bro, _1));
+};
 
 void Uno::onUnload(Brobot* bro) {
 	bro->unhook("[uno] gameStart", "OnPRIVMSG");
 	bro->unhook("[uno] joinHook", "OnPRIVMSG");
 	bro->unhook("[uno] listPlayers", "OnPRIVMSG");
 	bro->unhook("[uno] nickHook", "OnNICK");
-}
+	bro->unhook("[uno] partHook", "OnPART");
+	bro->unhook("[uno] quitHook", "OnQUIT");
+	bro->unhook("[uno] dropPlayer", "OnPRIVMSG");
+};
 
 void Uno::gameStart(Brobot* bro, Args& args) {
 	if (args[5] != ".uno" || args[4][0] != '#')
@@ -91,7 +97,7 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 	}
 	players.push_back(p);
 	printCard(bro, args[1], true, p.hand);
-}
+};
 
 void Uno::joinHook(Brobot* bro, Args& args) {
 	if (args[5] != ".join" || args[4] != channel)
@@ -117,10 +123,11 @@ void Uno::joinHook(Brobot* bro, Args& args) {
 		deck.pop_back();
 	}
 	players.push_back(p);
+	current_player = players.begin();
 	bro->irc->privmsg(args[4], args[1]+" has joined this game of 4U8N3O12!");
 	bro->irc->notice(args[1], "Your cards are:");
 	printCard(bro, args[1], true, p.hand);
-}
+};
 
 void Uno::listPlayers(Brobot* bro, Args& args) {
 	if (args[5] != ".players" || args[4] != channel)
@@ -133,6 +140,7 @@ void Uno::listPlayers(Brobot* bro, Args& args) {
 	BOOST_FOREACH( Player p, players)
 		pstring += p.nick+" ";
 	bro->irc->privmsg(args[4], "Playing order: "+pstring);
+	reverse();
 };
 
 void Uno::nickHook(Brobot* bro, Args& args) {
@@ -141,4 +149,46 @@ void Uno::nickHook(Brobot* bro, Args& args) {
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end())
 		it->nick = args[2];
-}
+};
+
+void Uno::partHook(Brobot* bro, Args& args) {
+	if (started == 0 || args[4] != channel)
+		return; // game hasn't started/wrong channel
+	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
+	if (it != players.end()) {
+		bro->irc->privmsg(channel, args[1]+" has left the game!");
+		if(current_player == it) {
+			skip(); // skip to the next player
+			bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
+		}
+		players.erase(it);
+	}
+};
+
+void Uno::quitHook(Brobot* bro, Args& args) {
+	if (started == 0)
+		return;
+	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
+	if (it != players.end()) {
+		bro->irc->privmsg(channel, args[1]+" has left the game!");
+		if(current_player == it) {
+			skip(); // skip to the next player
+			bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
+		}
+		players.erase(it);
+	}
+};
+
+void Uno::dropPlayer(Brobot* bro, Args& args) {
+	if (started == 0 || args[5] != ".drop" || args[4] != channel)
+		return;
+	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
+	if (it != players.end()) {
+		bro->irc->privmsg(channel, args[1]+" has left the game!");
+		if(current_player == it) {
+			skip(); // skip to the next player
+			bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
+		}
+		players.erase(it);
+	}
+};

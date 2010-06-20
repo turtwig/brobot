@@ -7,6 +7,8 @@ void CoreModule::onLoad(Brobot* bro) {
     bro->addParser("numerics", boost::bind(&CoreModule::numerics, this, bro, _1));
     bro->addParser("commands", boost::bind(&CoreModule::commands, this, bro, _1));
 	bro->addParser("nick", boost::bind(&CoreModule::nick, this, bro, _1));
+	bro->addParser("joinpart", boost::bind(&CoreModule::joinpart, this, bro, _1));
+	bro->addParser("quit", boost::bind(&CoreModule::quit, this, bro, _1));
     // Hooks
     bro->hook("[core] Ping", "OnPING", boost::bind(&CoreModule::pingHook, this, bro, _1));
 };
@@ -17,6 +19,8 @@ void CoreModule::onUnload(Brobot* bro) {
     bro->delParser("numerics");
     bro->delParser("ping");
 	bro->delParser("nick");
+	bro->delParser("joinpart");
+	bro->delParser("quit");
     // Hooks
     bro->unhook("[core] Ping", "OnPING");
 };
@@ -47,25 +51,53 @@ void CoreModule::numerics(Brobot* bro, const std::string& str) {
  * a[5] the actual message.
  */
 void CoreModule::commands(Brobot* bro, const std::string& str) {
-    static const boost::regex expr("^:(.+?)!(.+?)@(.+?) (.+?) (.+?) :(.+?)$"); // matches :NICK!IDENT@HOST COMMAND TARGET :MESSAGE
+    static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) (\\S+?) (\\S+?) :(.+?)$"); // matches :NICK!IDENT@HOST COMMAND TARGET :MESSAGE
     boost::cmatch match;
     if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
         return; // nothing else to do
+	if (match[4] == "PART")
+		return;
     Args arg;
     bro->runHooks("On" + match[4], arg % str % match[1] % match[2] % match[3] % match[5] % match[6]);
 };
 
 /* Handles nick changes
  * Hook is OnNICK
- * a[0] is the raw string, a[1] is the original nick, a[2] is the new nick
+ * a[0] is the raw string, a[1] is the original nick, a[2] is the new nick, a[3] is the ident, a[4] is the host
  */
 void CoreModule::nick(Brobot* bro, const std::string& str) {
-	static const boost::regex expr("^:(.+?)!.+?@.+? NICK :(.+?)$"); // matches NICK!IDENT@HOST NICK :NEWNICK
+	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) NICK :(\\S+?)$"); // matches NICK!IDENT@HOST NICK :NEWNICK
 	boost::cmatch match;
 	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
 		return; // nothing else to do
 	Args arg;
-	bro->runHooks("OnNICK", arg % str % match[1] % match[2]);
+	bro->runHooks("OnNICK", arg % str % match[1] % match[4] % match[2] % match[3]);
+};
+
+/* Handles join/parts
+ * Hook is OnJOIN/OnPART
+ * a[0] is the raw string, a[1] is the nick, a[2] is the ident, a[3] is the host, a[4] is the channel, a[5] is the part message (if any)
+ */
+void CoreModule::joinpart(Brobot* bro, const std::string& str) {
+	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) (JOIN|PART) :?(#\\S+?)( :(.+?))?$"); // matches NICK!IDENT@HOST JOIN|PART :?#CHANNEL
+	boost::cmatch match;
+	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
+		return; // nothing else to do
+	Args arg;
+	bro->runHooks("On"+match[4], arg % str % match[1] % match[2] % match[3] % match[5] % match[7]);
+};
+
+/* Handles quits
+ * Hook is OnQUIT
+ * a[0] is the raw string, a[1] is the nick, a[2] is the ident, a[3] is the hostmask, a[2] is the quit message
+ */
+void CoreModule::quit(Brobot* bro, const std::string& str) {
+	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) QUIT :(.+?)$"); // matches NICK!IDENT@HOST QUIT :MESSAGE
+	boost::cmatch match;
+	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
+		return; // nothing else to do
+	Args arg;
+	bro->runHooks("OnQUIT", arg % str % match[1] % match[2] % match[3] % match[4]);
 };
 
 /* Handles PING

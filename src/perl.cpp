@@ -28,4 +28,4 @@ void PerlTest(Brobot* bro, Args& args) {
 	perl_line += "}; $@;";
 	SV* h = eval_pv(perl_line.c_str(), TRUE);
 	bro->irc->privmsg("#goodjob", SvPV_nolen(h));
-}
+};

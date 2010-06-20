@@ -25,7 +25,7 @@ XS (XS_brobot_say)
 		g_bro->irc->privmsg(chan, text);
 	}
 	XSRETURN_EMPTY;
-}
+};
 
 EXTERN_C void
 xs_init(pTHX)
@@ -38,4 +38,4 @@ xs_init(pTHX)
 	newXS("Win32CORE::bootstrap", boot_Win32CORE, file);
 	//
 	newXS("Brobot::say", XS_brobot_say, file);
-}
+};

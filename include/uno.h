@@ -40,7 +40,6 @@ class Uno : public BaseModule {
 	Uno() : started(0), discard(0, red, none, "") {};
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
-	void setchannel(const std::string chan) { channel = chan; };
 	void reverse() { std::reverse(players.begin(), players.end()); };
 	void skip() { if (++current_player == players.end()) current_player = players.begin(); };
 	void printCard(Brobot* bro, const std::string& target, bool notice, Card card);
@@ -49,6 +48,9 @@ class Uno : public BaseModule {
 	void joinHook(Brobot* bro, Args& args);
 	void listPlayers(Brobot* bro, Args& args);
 	void nickHook(Brobot* bro, Args& args);
+	void partHook(Brobot* bro, Args& args);
+	void quitHook(Brobot* bro, Args& args);
+	void dropPlayer(Brobot* bro, Args& args);
 };
 
 // Cards definition
