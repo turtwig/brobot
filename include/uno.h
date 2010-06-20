@@ -24,7 +24,7 @@ struct Player {
 	std::vector<Card> hand;
 	bool has_drawn;
 	std::string nick;
-	Player(const std::string& n) : nick(n) {};
+	Player(const std::string& n) : nick(n), has_drawn(false) {};
 	bool operator==(const std::string& n) { return n == nick; };
 };
 
@@ -41,7 +41,7 @@ class Uno : public BaseModule {
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
 	void reverse() { std::reverse(players.begin(), players.end()); };
-	void skip() { if (++current_player == players.end()) current_player = players.begin(); };
+	void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
 	void printCard(Brobot* bro, const std::string& target, bool notice, Card card);
 	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
 	void gameStart(Brobot* bro, Args& args);
@@ -55,6 +55,9 @@ class Uno : public BaseModule {
 	void startGame(Brobot* bro, Args& args); // handles .start rather than .uno
 	void showDiscard(Brobot* bro, Args& args);
 	void nextTurn(Brobot* bro);
+	void passTurn(Brobot* bro, Args& args);
+	void drawCard(Brobot* bro, Args& args);
+	void showHand(Brobot* bro, Args& args);
 };
 
 // Cards definition
