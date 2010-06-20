@@ -296,6 +296,7 @@ void Uno::joinHook(Brobot* bro, Args& args) {
 	if (players.size() == 10) {
 		bro->irc->privmsg(args[4], "There are 10 players in "+args[4]+" already!");
 		bro->irc->privmsg(args[4], "Type .start to start the game!");
+		return;
 	}
 	Player p(args[1]);
 	for (int i = 0; i < 7; ++i) {
