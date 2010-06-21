@@ -12,7 +12,7 @@ Card::Card(short int num, Cardtype col, Cardattr spec, const std::string& fname)
 	file.close();
 };
 
-void Uno::printCard(Brobot* bro, const std::string& target, bool notice, Card card) { // single card
+void Uno::printCard(Brobot* bro, const std::string& target, bool notice, const Card& card) { // single card
 	for (int i = 0; i < 14; ++i) {
 		if (notice) {
 			bro->irc->notice(target, card.ascii[i]);
@@ -221,12 +221,25 @@ void Uno::endGame(Brobot* bro) {
 		return;
 	bro->irc->privmsg(channel, "4U8N3O12! game in "+channel+" ended!");
 	if (players.size() > 1) {
-		bro->irc->privmsg(channel, "Winner is "+current_player->nick+"!");
+		std::string winner = current_player->nick;
 		players.erase(current_player);
+		unsigned int score = 0;
 		BOOST_FOREACH(Player p, players) {
 			bro->irc->privmsg(channel, ""+p.nick+" still had:");
 			printCard(bro, channel, false, p.hand);
+			BOOST_FOREACH(Card c, p.hand) {
+				if (c.attr == none) {
+					score += c.number;
+				} else if (c.attr == wildattr || c.attr == drawfour) {
+					score += 50;
+				} else if (c.attr == skip || c.attr == reverse || c.attr == drawtwo) {
+					score += 20;
+				}
+			}
 		}
+		char tmpbuf[10]; // a really small one (but no one will have a score with more than 9 digits (right))
+		_itoa(score, tmpbuf, 10);
+		bro->irc->privmsg(channel, "Winner is "+winner+" with "+std::string(tmpbuf)+" points!");
 	}
 	started = 0;
 	channel.clear();
