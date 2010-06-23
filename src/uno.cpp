@@ -213,6 +213,7 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 		deck.pop_back();
 	}
 	players.push_back(p);
+	bro->irc->notice(args[1], "Your cards are:");
 	printCard(bro, args[1], true, p.hand);
 };
 
@@ -230,7 +231,7 @@ void Uno::endGame(Brobot* bro) {
 			BOOST_FOREACH(Card c, p.hand) {
 				if (c.attr == none) {
 					score += c.number;
-				} else if (c.attr == wildattr || c.attr == drawfour) {
+				} else if (c.attr == wild || c.attr == drawfour) {
 					score += 50;
 				} else if (c.attr == skip || c.attr == reverse || c.attr == drawtwo) {
 					score += 20;
@@ -279,10 +280,73 @@ void Uno::startGame(Brobot* bro, Args& args) {
 	BOOST_FOREACH( Player p, players)
 		pstring += p.nick+" ";
 	bro->irc->privmsg(args[4], "Playing order: "+pstring);
-	discard.push_back(deck.back());
-	deck.pop_back();
+	//discard.push_back(deck.back());
+	//deck.pop_back();
+	discard.push_back(_p4wild);
 	started = 2;
 	nextTurn(bro);
+	if (discard.back().attr == none) {
+	} else if (discard.back().attr == wild || discard.back().attr == drawfour) {
+		switch (rand() % 4) {
+			case 0:
+				discard.back().type = red;
+				bro->irc->privmsg(channel, "Color is now 4red!");
+				break;
+			case 1:
+				discard.back().type = blue;
+				bro->irc->privmsg(channel, "Color is now 12blue!");
+				break;
+			case 2:
+				discard.back().type = green;
+				bro->irc->privmsg(channel, "Color is now 9green!");
+				break;
+			case 3:
+				discard.back().type = yellow;
+				bro->irc->privmsg(channel, "Color is now 8yellow!");
+				break;
+		}
+		has_set_wild_color = true;
+	} else if (discard.back().attr == skip) {
+		bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
+		nextPlayer();
+		nextTurn(bro);
+	} else if (discard.back().attr == reverse) {
+		if (players.size() > 2) {
+			reversePlayers();
+			bro->irc->privmsg(channel, "Playing order has been reversed!");
+			std::string pstring;
+			std::vector<Player>::iterator it = current_player;
+			while (it != players.end()) {
+				pstring += it++->nick+" ";
+			}
+			it = players.begin();
+			while (it != current_player) {
+				pstring += it++->nick+" ";
+			}
+			bro->irc->privmsg(channel, "Playing order is now: "+pstring);
+		} else { // act like a skip
+			bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
+			nextPlayer();
+			nextTurn(bro);
+		}
+	} else if (discard.back().attr == drawtwo) {
+		bro->irc->privmsg(channel, ""+current_player->nick+" must draw two cards!");
+	}
+};
+
+void Uno::reversePlayers() {
+	std::vector<Player> tmp;
+	std::vector<Player>::iterator it = current_player;
+	while (it != players.begin()) {
+		tmp.push_back(*(it--));
+	}
+	tmp.push_back(*it);
+	it = --players.end();
+	while (it != current_player) {
+		tmp.push_back(*(it--));
+	}
+	players = tmp;
+	current_player = players.begin();
 };
 
 void Uno::drawCard(Brobot* bro, Args& args) {
@@ -299,11 +363,37 @@ void Uno::drawCard(Brobot* bro, Args& args) {
 		bro->irc->privmsg(channel, "You have already drawn a card!");
 		return;
 	}
-	it->hand.push_back(deck.back());
-	bro->irc->privmsg(channel, ""+args[1]+" draws a card!");
-	bro->irc->notice(args[1], "You have drawn:");
-	printCard(bro, args[1], true, deck.back());
-	deck.pop_back();
+	if (discard.back().attr == drawtwo) {
+		bro->irc->privmsg(channel, ""+args[1]+" must draw two cards!");
+		std::vector<Card> drawncards;
+		drawncards.push_back(deck.back());
+		deck.pop_back();
+		drawncards.push_back(deck.back());
+		deck.pop_back();
+		bro->irc->notice(args[1], "You have drawn:");
+		printCard(bro, args[1], true, drawncards);
+		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
+	} else if (discard.back().attr == drawfour) {
+		bro->irc->privmsg(channel, ""+args[1]+" must draw four cards!");
+		std::vector<Card> drawncards;
+		drawncards.push_back(deck.back());
+		deck.pop_back();
+		drawncards.push_back(deck.back());
+		deck.pop_back();
+		drawncards.push_back(deck.back());
+		deck.pop_back();
+		drawncards.push_back(deck.back());
+		deck.pop_back();
+		bro->irc->notice(args[1], "You have drawn:");
+		printCard(bro, args[1], true, drawncards);
+		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
+	} else {
+		it->hand.push_back(deck.back());
+		bro->irc->privmsg(channel, ""+args[1]+" draws a card!");
+		bro->irc->notice(args[1], "You have drawn:");
+		printCard(bro, args[1], true, deck.back());
+		deck.pop_back();
+	}
 	it->has_drawn = true;
 };
 
@@ -333,7 +423,7 @@ void Uno::showHand(Brobot* bro, Args& args) {
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
 		return;
-	bro->irc->notice(args[1], "Your cards:");
+	bro->irc->notice(args[1], "Your cards are:");
 	printCard(bro, args[1], true, it->hand);
 };
 
@@ -341,6 +431,12 @@ void Uno::nextTurn(Brobot* bro) {
 	bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
 	bro->irc->privmsg(channel, "Current discard:");
 	printCard(bro, channel, false, discard.back());
+	if (discard.back().attr == none) {
+	} else if (discard.back().attr == drawtwo) {
+		bro->irc->privmsg(channel, ""+current_player->nick+" must draw two cards!");
+	} else if (discard.back().attr == drawfour) {
+		bro->irc->privmsg(channel, ""+current_player->nick+" must draw four cards!");
+	}
 };
 
 
@@ -384,8 +480,14 @@ void Uno::listPlayers(Brobot* bro, Args& args) {
 	if (started == 0 || args[5] != ".players" || args[4] != channel)
 		return;
 	std::string pstring;
-	BOOST_FOREACH( Player p, players)
-		pstring += p.nick+" ";
+	std::vector<Player>::iterator it = current_player;
+	while (it != players.end()) {
+		pstring += it++->nick+" ";
+	}
+	it = players.begin();
+	while (it != current_player) {
+		pstring += it++->nick+" ";
+	}
 	bro->irc->privmsg(args[4], "Playing order: "+pstring);
 	if (started == 2)
 		bro->irc->privmsg(args[4], "It is "+current_player->nick+"'s turn!");
@@ -396,6 +498,31 @@ void Uno::showDiscard(Brobot* bro, Args& args) {
 		return;
 	bro->irc->privmsg(args[4], "Current discard:");
 	printCard(bro, channel, false, discard.back());
+	if (discard.back().attr == none) {
+	} else if (discard.back().attr == wild || discard.back().attr == drawfour) {
+		if (has_set_wild_color) {
+			switch(discard.back().type) {
+				case red:
+					bro->irc->privmsg(channel, "Current color is 4red!");
+					break;
+				case blue:
+					bro->irc->privmsg(channel, "Current color is 12blue!");
+					break;
+				case green:
+					bro->irc->privmsg(channel, "Current color is 9green!");
+					break;
+				case yellow:
+					bro->irc->privmsg(channel, "Current color is 8yellow!!");
+					break;
+			}
+		} else {
+			bro->irc->privmsg(channel, ""+current_player->nick+" has not yet set a color!");
+		}
+		if (discard.back().attr == drawfour && !current_player->has_drawn)
+			bro->irc->privmsg(channel, ""+current_player->nick+" must draw four cards!");
+	} else if (discard.back().attr == drawtwo && !current_player->has_drawn) {
+		bro->irc->privmsg(channel, ""+current_player->nick+" must draw two cards!");
+	}
 };
 
 void Uno::nickHook(Brobot* bro, Args& args) {
@@ -426,7 +553,9 @@ void Uno::partHook(Brobot* bro, Args& args) {
 			discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		}
 		dropped_players.push_back(args[1]);
+		std::string current_nick = current_player->nick;
 		players.erase(it);
+		current_player = std::find(players.begin(), players.end(), current_nick);
 	}
 };
 
@@ -447,7 +576,9 @@ void Uno::quitHook(Brobot* bro, Args& args) {
 			discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		}
 		dropped_players.push_back(args[1]);
+		std::string current_nick = current_player->nick;
 		players.erase(it);
+		current_player = std::find(players.begin(), players.end(), current_nick);
 	}
 };
 
@@ -468,6 +599,8 @@ void Uno::dropPlayer(Brobot* bro, Args& args) {
 			discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		}
 		dropped_players.push_back(args[1]);
+		std::string current_nick = current_player->nick;
 		players.erase(it);
+		current_player = std::find(players.begin(), players.end(), current_nick);
 	}
 };

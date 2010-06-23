@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include "../include/brobot.h"
 #include "../include/Core.h"
 #include "../include/uno.h"
@@ -10,6 +12,7 @@ extern void ascii(Brobot* bot, Args& args);
 extern void PerlTest(Brobot* bro, Args& args);
 
 int main(int argc, char** argv, char** env) {
+	std::srand(std::time(NULL));
 	PERL_SYS_INIT3(&argc, &argv, &env);
     try {
         boost::asio::io_service io_service;

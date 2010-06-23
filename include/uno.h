@@ -10,8 +10,8 @@
 
 const std::string ascii_dir = "C:\\Users\\Admin\\Desktop\\ascii\\uno\\";
 
-enum Cardtype { red, blue, green, yellow, wild };
-enum Cardattr { none, skip, reverse, drawtwo, drawfour, wildattr }; // drawfour is w+4, wild is just wild
+enum Cardtype { red, blue, green, yellow };
+enum Cardattr { none, skip, reverse, drawtwo, drawfour, wild }; // drawfour is w+4, wild is just wild
 
 struct Card {
 	short int number; // -1 = special card
@@ -37,11 +37,12 @@ class Uno : public BaseModule {
 	std::string channel;
 	std::vector<Player>::iterator current_player;
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
+	bool has_set_wild_color;
 	public:
-	Uno() : started(0) {};
+	Uno() : started(0), has_set_wild_color(false) {};
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
-	void reversePlayers() { std::reverse(players.begin(), players.end()); };
+	void reversePlayers();
 	void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
 	void printCard(Brobot* bro, const std::string& target, bool notice, const Card& card);
 	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
@@ -118,8 +119,8 @@ const Card _9yellow(9, yellow, none, "9yellow.txt");
 const Card _p2yellow(-1, yellow, drawtwo, "+2yellow.txt");
 const Card _skipyellow(-1, yellow, skip, "skipyellow.txt");
 const Card _reverseyellow(-1, yellow, reverse, "reverseyellow.txt");
-// Wilds
-const Card _wild(-1, wild, wildattr, "wild.txt");
-const Card _p4wild(-1, wild, drawfour, "wild+4.txt");
+// Wilds (colors aren't checked in wilds, they are set)
+const Card _wild(-1, red, wild, "wild.txt");
+const Card _p4wild(-1, red, drawfour, "wild+4.txt");
 
 #endif // UNO_H_INCLUDED
