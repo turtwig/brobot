@@ -52,7 +52,7 @@ void Brobot::runHooks(const std::string& hook, Args& arg) {
     typedef std::pair<std::string, boost::function<void (Args&)> > penis_t;
     if (callbacks.find(hook) == callbacks.end())
         return; // no such hook map
-    BOOST_FOREACH( penis_t h, callbacks[hook] )
+	BOOST_FOREACH( penis_t h, callbacks[hook] )
         h.second(arg);
 };
 

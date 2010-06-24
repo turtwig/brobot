@@ -57,6 +57,7 @@ class Uno : public BaseModule {
 	void quitHook(Brobot* bro, Args& args);
 	void dropPlayer(Brobot* bro, Args& args);
 	void endGame(Brobot* bro);
+	void gameEnd(Brobot* bro, Args& args); // handles .endgame
 	void startGame(Brobot* bro, Args& args); // handles .start rather than .uno
 	void showDiscard(Brobot* bro, Args& args);
 	void nextTurn(Brobot* bro);

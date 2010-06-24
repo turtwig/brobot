@@ -58,12 +58,36 @@ void Uno::printCard(Brobot* bro, const std::string& target, bool notice, std::ve
 void Uno::onLoad(Brobot* bro) {
 	bro->hook("[uno] gameStart", "OnPRIVMSG", boost::bind(&Uno::gameStart, this, bro, _1));
 	bro->hook("[uno] help", "OnPRIVMSG", boost::bind(&Uno::help, this, bro, _1));
+	bro->hook("[uno] joinHook", "OnPRIVMSG", boost::bind(&Uno::joinHook, this, bro, _1));
+	bro->hook("[uno] listPlayers", "OnPRIVMSG", boost::bind(&Uno::listPlayers, this, bro, _1));
+	bro->hook("[uno] nickHook", "OnNICK", boost::bind(&Uno::nickHook, this, bro, _1));
+	bro->hook("[uno] partHook", "OnPART", boost::bind(&Uno::partHook, this, bro, _1));
+	bro->hook("[uno] quitHook", "OnQUIT", boost::bind(&Uno::quitHook, this, bro, _1));
+	bro->hook("[uno] dropPlayer", "OnPRIVMSG", boost::bind(&Uno::dropPlayer, this, bro, _1));
+	bro->hook("[uno] startGame", "OnPRIVMSG", boost::bind(&Uno::startGame, this, bro, _1));
+	bro->hook("[uno] showDiscard", "OnPRIVMSG", boost::bind(&Uno::showDiscard, this, bro, _1));
+	bro->hook("[uno] passTurn", "OnPRIVMSG", boost::bind(&Uno::passTurn, this, bro, _1));
+	bro->hook("[uno] drawCard", "OnPRIVMSG", boost::bind(&Uno::drawCard, this, bro, _1));
+	bro->hook("[uno] showHand", "OnPRIVMSG", boost::bind(&Uno::showHand, this, bro, _1));
+	bro->hook("[uno] gameEnd", "OnPRIVMSG", boost::bind(&Uno::gameEnd, this, bro, _1));
 };
 
 void Uno::onUnload(Brobot* bro) {
 	endGame(bro); // make sure the game ends properly (if any)
 	bro->unhook("[uno] gameStart", "OnPRIVMSG");
 	bro->unhook("[uno] help", "OnPRIVMSG");
+	bro->unhook("[uno] joinHook", "OnPRIVMSG");
+	bro->unhook("[uno] listPlayers", "OnPRIVMSG");
+	bro->unhook("[uno] nickHook", "OnNICK");
+	bro->unhook("[uno] partHook", "OnPART");
+	bro->unhook("[uno] quitHook", "OnQUIT");
+	bro->unhook("[uno] dropPlayer", "OnPRIVMSG");
+	bro->unhook("[uno] startGame", "OnPRIVMSG");
+	bro->unhook("[uno] showDiscard", "OnPRIVMSG");
+	bro->unhook("[uno] passTurn", "OnPRIVMSG");
+	bro->unhook("[uno] drawCard", "OnPRIVMSG");
+	bro->unhook("[uno] showHand", "OnPRIVMSG");
+	bro->unhook("[uno] gameEnd", "OnPRIVMSG");
 };
 
 void Uno::help(Brobot* bro, Args& args) {
@@ -74,6 +98,7 @@ void Uno::help(Brobot* bro, Args& args) {
 	bro->irc->privmsg(args[4], ".uno                creates a game");
 	bro->irc->privmsg(args[4], ".join               joins the game");
 	bro->irc->privmsg(args[4], ".start              starts a created game");
+	bro->irc->privmsg(args[4], ".endgame            ends a game");
 	bro->irc->privmsg(args[4], ".drop               drops you from the game");
 	bro->irc->privmsg(args[4], ".hand               shows your hand");
 	bro->irc->privmsg(args[4], ".discard            shows current discard");
@@ -83,6 +108,16 @@ void Uno::help(Brobot* bro, Args& args) {
 	bro->irc->privmsg(args[4], " ");
 	bro->irc->privmsg(args[4], "You cannot join a game in progress.");
 	bro->irc->privmsg(args[4], "If you drop from a game you cannot re-join it.");
+};
+
+void Uno::gameEnd(Brobot* bro, Args& args) {
+	if (args[5] != ".endgame" || args[4] != channel)
+		return;
+	if (uno_creator != args[1]) {
+		bro->irc->privmsg(channel, "Only "+uno_creator+" can end the game!");
+		return;
+	}
+	endGame(bro);
 };
 
 void Uno::gameStart(Brobot* bro, Args& args) {
@@ -95,18 +130,6 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 	started = 1;
 	channel = args[4];
 	uno_creator = args[1];
-	// Only add the hooks after the game starts
-	bro->hook("[uno] joinHook", "OnPRIVMSG", boost::bind(&Uno::joinHook, this, bro, _1));
-	bro->hook("[uno] listPlayers", "OnPRIVMSG", boost::bind(&Uno::listPlayers, this, bro, _1));
-	bro->hook("[uno] nickHook", "OnNICK", boost::bind(&Uno::nickHook, this, bro, _1));
-	bro->hook("[uno] partHook", "OnPART", boost::bind(&Uno::partHook, this, bro, _1));
-	bro->hook("[uno] quitHook", "OnQUIT", boost::bind(&Uno::quitHook, this, bro, _1));
-	bro->hook("[uno] dropPlayer", "OnPRIVMSG", boost::bind(&Uno::dropPlayer, this, bro, _1));
-	bro->hook("[uno] startGame", "OnPRIVMSG", boost::bind(&Uno::startGame, this, bro, _1));
-	bro->hook("[uno] showDiscard", "OnPRIVMSG", boost::bind(&Uno::showDiscard, this, bro, _1));
-	bro->hook("[uno] passTurn", "OnPRIVMSG", boost::bind(&Uno::passTurn, this, bro, _1));
-	bro->hook("[uno] drawCard", "OnPRIVMSG", boost::bind(&Uno::drawCard, this, bro, _1));
-	bro->hook("[uno] showHand", "OnPRIVMSG", boost::bind(&Uno::showHand, this, bro, _1));
 	bro->irc->privmsg(args[4], "Starting 4U8N3O12! game in "+args[4]+"!");
 	bro->irc->privmsg(args[4], "Say .join to join in and .start to start the game!");
 	// Deck cards
@@ -273,18 +296,6 @@ void Uno::endGame(Brobot* bro) {
 	deck.clear();
 	discard.clear();
 	current_player = players.end();
-	// Remove added hooks after game is over
-	bro->unhook("[uno] joinHook", "OnPRIVMSG");
-	bro->unhook("[uno] listPlayers", "OnPRIVMSG");
-	bro->unhook("[uno] nickHook", "OnNICK");
-	bro->unhook("[uno] partHook", "OnPART");
-	bro->unhook("[uno] quitHook", "OnQUIT");
-	bro->unhook("[uno] dropPlayer", "OnPRIVMSG");
-	bro->unhook("[uno] startGame", "OnPRIVMSG");
-	bro->unhook("[uno] showDiscard", "OnPRIVMSG");
-	bro->unhook("[uno] passTurn", "OnPRIVMSG");
-	bro->unhook("[uno] drawCard", "OnPRIVMSG");
-	bro->unhook("[uno] showHand", "OnPRIVMSG");
 };
 
 void Uno::startGame(Brobot* bro, Args& args) {
@@ -292,6 +303,10 @@ void Uno::startGame(Brobot* bro, Args& args) {
 		return;
 	if (started == 2) {
 		bro->irc->privmsg(channel, "Game in "+channel+" is already in progress!");
+		return;
+	}
+	if (uno_creator != args[1]) {
+		bro->irc->privmsg(channel, "Only "+uno_creator+" can start the game!");
 		return;
 	}
 	if (players.size() < 2 || players.size() > 10) {
