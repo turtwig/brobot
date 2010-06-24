@@ -36,22 +36,27 @@ void Brobot::hook(const std::string& name, const std::string& hook, boost::funct
 };
 
 void Brobot::unhook(const std::string& name, const std::string& hook) {
-    std::map<std::string, callback_map_t>::iterator upper_iter = callbacks.find(hook);
-    if (upper_iter != callbacks.end()) { // look for hooks
-        callback_map_t::iterator lower_iter = upper_iter->second.find(name);
-        if (lower_iter != upper_iter->second.end()) { // look for the specific hook
-            upper_iter->second.erase(lower_iter); // erase the actual hook
-            if (upper_iter->second.empty()) { // the map pointed to by the "top" map (i.e. the one containing the actual funtions) is empty
-                callbacks.erase(upper_iter); // so we can erase this element
-            }
-        }
-    }
+	hooks_to_unhook.push_back(std::make_pair(name, hook)); // add hooks to the list of hooks to be unhooked on next runHooks
 };
 
 void Brobot::runHooks(const std::string& hook, Args& arg) {
     typedef std::pair<std::string, boost::function<void (Args&)> > penis_t;
     if (callbacks.find(hook) == callbacks.end())
         return; // no such hook map
+	typedef std::pair<std::string, std::string> unhook_t;
+	BOOST_FOREACH( unhook_t penis, hooks_to_unhook ) {
+		std::map<std::string, callback_map_t>::iterator upper_iter = callbacks.find(penis.second);
+		if (upper_iter != callbacks.end()) { // look for hooks
+			callback_map_t::iterator lower_iter = upper_iter->second.find(penis.first);
+			if (lower_iter != upper_iter->second.end()) { // look for the specific hook
+				upper_iter->second.erase(lower_iter); // erase the actual hook
+				if (upper_iter->second.empty()) { // the map pointed to by the "top" map (i.e. the one containing the actual funtions) is empty
+	                callbacks.erase(upper_iter); // so we can erase this element
+				}
+	        }
+		}
+	}
+	hooks_to_unhook.clear();
 	BOOST_FOREACH( penis_t h, callbacks[hook] )
         h.second(arg);
 };

@@ -60,6 +60,8 @@ class Brobot : private boost::noncopyable {
 
     std::map<std::string, boost::function<void (const std::string&)> > parserEvents; // map of functions to call on each run of parse(), (name, function)
 
+	std::vector<std::pair<std::string, std::string> > hooks_to_unhook; // map of hooks to be unhooked on the next runHooks()
+
     public:
 	Brobot(boost::asio::io_service& io, boost::asio::ssl::context& ctx, const std::string& fname = "brobot.conf");
     ~Brobot();
