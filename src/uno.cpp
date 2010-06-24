@@ -235,6 +235,7 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 		deck.pop_back();
 	}
 	players.push_back(p);
+	current_player = players.begin();
 	bro->irc->notice(args[1], "Your cards are:");
 	printCard(bro, args[1], true, p.hand);
 };
