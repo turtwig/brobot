@@ -57,11 +57,32 @@ void Uno::printCard(Brobot* bro, const std::string& target, bool notice, std::ve
 
 void Uno::onLoad(Brobot* bro) {
 	bro->hook("[uno] gameStart", "OnPRIVMSG", boost::bind(&Uno::gameStart, this, bro, _1));
+	bro->hook("[uno] help", "OnPRIVMSG", boost::bind(&Uno::help, this, bro, _1));
 };
 
 void Uno::onUnload(Brobot* bro) {
 	endGame(bro); // make sure the game ends properly (if any)
 	bro->unhook("[uno] gameStart", "OnPRIVMSG");
+	bro->unhook("[uno] help", "OnPRIVMSG");
+};
+
+void Uno::help(Brobot* bro, Args& args) {
+	if (args[5] != ".uno help" || args[4][0] != '#')
+		return;
+	bro->irc->privmsg(args[4], "           4U8N3O12! HELP");
+	bro->irc->privmsg(args[4], ".uno help           this help");
+	bro->irc->privmsg(args[4], ".uno                creates a game");
+	bro->irc->privmsg(args[4], ".join               joins the game");
+	bro->irc->privmsg(args[4], ".start              starts a created game");
+	bro->irc->privmsg(args[4], ".drop               drops you from the game");
+	bro->irc->privmsg(args[4], ".hand               shows your hand");
+	bro->irc->privmsg(args[4], ".discard            shows current discard");
+	bro->irc->privmsg(args[4], ".players            shows playing order and current player");
+	bro->irc->privmsg(args[4], ".draw               draws a card");
+	bro->irc->privmsg(args[4], ".pass               passes turn");
+	bro->irc->privmsg(args[4], " ");
+	bro->irc->privmsg(args[4], "You cannot join a game in progress.");
+	bro->irc->privmsg(args[4], "If you drop from a game you cannot re-join it.");
 };
 
 void Uno::gameStart(Brobot* bro, Args& args) {
@@ -625,7 +646,7 @@ void Uno::dropPlayer(Brobot* bro, Args& args) {
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
-		if (players.size() == 1 || started == 1 || (players.size() <= 2 && started == 2)) {
+		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
 			if (started == 2 && current_player == it)
 				nextPlayer();
 			endGame(bro);

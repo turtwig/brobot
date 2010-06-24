@@ -49,6 +49,7 @@ class Uno : public BaseModule {
 	void printCard(Brobot* bro, const std::string& target, bool notice, const Card& card);
 	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
 	void gameStart(Brobot* bro, Args& args);
+	void help(Brobot* bro, Args& args);
 	void joinHook(Brobot* bro, Args& args);
 	void listPlayers(Brobot* bro, Args& args);
 	void nickHook(Brobot* bro, Args& args);
