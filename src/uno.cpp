@@ -73,6 +73,7 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 	}
 	started = 1;
 	channel = args[4];
+	uno_creator = args[1];
 	// Only add the hooks after the game starts
 	bro->hook("[uno] joinHook", "OnPRIVMSG", boost::bind(&Uno::joinHook, this, bro, _1));
 	bro->hook("[uno] listPlayers", "OnPRIVMSG", boost::bind(&Uno::listPlayers, this, bro, _1));
@@ -244,6 +245,7 @@ void Uno::endGame(Brobot* bro) {
 	}
 	started = 0;
 	channel.clear();
+	uno_creator.clear();
 	players.clear();
 	dropped_players.clear();
 	deck.clear();
@@ -279,38 +281,38 @@ void Uno::startGame(Brobot* bro, Args& args) {
 	std::string pstring;
 	BOOST_FOREACH( Player p, players)
 		pstring += p.nick+" ";
-	bro->irc->privmsg(args[4], "Playing order: "+pstring);
-	//discard.push_back(deck.back());
-	//deck.pop_back();
-	discard.push_back(_p4wild);
+	bro->irc->privmsg(args[4], "Playing order: "+pstring);
+	discard.push_back(deck.back());
+	deck.pop_back();
 	started = 2;
-	nextTurn(bro);
 	if (discard.back().attr == none) {
+		nextTurn(bro);
 	} else if (discard.back().attr == wild || discard.back().attr == drawfour) {
 		switch (rand() % 4) {
 			case 0:
 				discard.back().type = red;
-				bro->irc->privmsg(channel, "Color is now 4red!");
 				break;
 			case 1:
 				discard.back().type = blue;
-				bro->irc->privmsg(channel, "Color is now 12blue!");
 				break;
 			case 2:
 				discard.back().type = green;
-				bro->irc->privmsg(channel, "Color is now 9green!");
 				break;
 			case 3:
 				discard.back().type = yellow;
-				bro->irc->privmsg(channel, "Color is now 8yellow!");
 				break;
 		}
 		has_set_wild_color = true;
+		if (discard.back().attr == drawfour)
+			has_to_draw_cards = true;
+		nextTurn(bro);
 	} else if (discard.back().attr == skip) {
+		nextTurn(bro);
 		bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
 		nextPlayer();
 		nextTurn(bro);
 	} else if (discard.back().attr == reverse) {
+		nextTurn(bro);
 		if (players.size() > 2) {
 			reversePlayers();
 			bro->irc->privmsg(channel, "Playing order has been reversed!");
@@ -330,7 +332,8 @@ void Uno::startGame(Brobot* bro, Args& args) {
 			nextTurn(bro);
 		}
 	} else if (discard.back().attr == drawtwo) {
-		bro->irc->privmsg(channel, ""+current_player->nick+" must draw two cards!");
+		has_to_draw_cards = true;
+		nextTurn(bro);
 	}
 };
 
@@ -363,36 +366,52 @@ void Uno::drawCard(Brobot* bro, Args& args) {
 		bro->irc->privmsg(channel, "You have already drawn a card!");
 		return;
 	}
-	if (discard.back().attr == drawtwo) {
+	if (has_to_draw_cards && discard.back().attr == drawtwo) {
 		bro->irc->privmsg(channel, ""+args[1]+" must draw two cards!");
 		std::vector<Card> drawncards;
 		drawncards.push_back(deck.back());
 		deck.pop_back();
+		if (deck.empty())
+			swapDecks();
 		drawncards.push_back(deck.back());
 		deck.pop_back();
+		if (deck.empty())
+			swapDecks();
 		bro->irc->notice(args[1], "You have drawn:");
 		printCard(bro, args[1], true, drawncards);
 		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
-	} else if (discard.back().attr == drawfour) {
+		has_to_draw_cards = false;
+	} else if (has_to_draw_cards && discard.back().attr == drawfour) {
 		bro->irc->privmsg(channel, ""+args[1]+" must draw four cards!");
 		std::vector<Card> drawncards;
 		drawncards.push_back(deck.back());
 		deck.pop_back();
+		if (deck.empty())
+			swapDecks();
 		drawncards.push_back(deck.back());
 		deck.pop_back();
+		if (deck.empty())
+			swapDecks();
 		drawncards.push_back(deck.back());
 		deck.pop_back();
+		if (deck.empty())
+			swapDecks();
 		drawncards.push_back(deck.back());
 		deck.pop_back();
+		if (deck.empty())
+			swapDecks();
 		bro->irc->notice(args[1], "You have drawn:");
 		printCard(bro, args[1], true, drawncards);
 		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
+		has_to_draw_cards = false;
 	} else {
 		it->hand.push_back(deck.back());
 		bro->irc->privmsg(channel, ""+args[1]+" draws a card!");
 		bro->irc->notice(args[1], "You have drawn:");
 		printCard(bro, args[1], true, deck.back());
 		deck.pop_back();
+		if (deck.empty())
+			swapDecks();
 	}
 	it->has_drawn = true;
 };
@@ -407,7 +426,7 @@ void Uno::passTurn(Brobot* bro, Args& args) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
 	}
-	if (!it->has_drawn) {
+	if (!it->has_drawn || has_to_draw_cards) {
 		bro->irc->privmsg(channel, "You need to draw a card first!");
 		return;
 	}
@@ -432,11 +451,29 @@ void Uno::nextTurn(Brobot* bro) {
 	bro->irc->privmsg(channel, "Current discard:");
 	printCard(bro, channel, false, discard.back());
 	if (discard.back().attr == none) {
-	} else if (discard.back().attr == drawtwo) {
+	} else if (has_to_draw_cards && discard.back().attr == drawtwo) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" must draw two cards!");
-	} else if (discard.back().attr == drawfour) {
+	} else if (has_to_draw_cards && discard.back().attr == drawfour) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" must draw four cards!");
 	}
+	if (has_set_wild_color && (discard.back().attr == wild || discard.back().attr == drawfour)) {
+		switch(discard.back().type) {
+			case red:
+				bro->irc->privmsg(channel, "Color is 4red!");
+				break;
+			case 1:
+				bro->irc->privmsg(channel, "Color is 12blue!");
+				break;
+			case 2:
+				bro->irc->privmsg(channel, "Color is 9green!");
+				break;
+			case 3:
+				bro->irc->privmsg(channel, "Color is 8yellow!");
+				break;
+		}
+	}
+	bro->irc->notice(current_player->nick, "Your cards are:");
+	printCard(bro, current_player->nick, true, current_player->hand);
 };
 
 
@@ -455,8 +492,6 @@ void Uno::joinHook(Brobot* bro, Args& args) {
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
 		bro->irc->privmsg(args[4], "You are already in the game!");
-		bro->irc->notice(args[1], "Your cards are:");
-		printCard(bro, args[1], true, it->hand);
 		return;
 	}
 	if (players.size() == 10) {
@@ -503,24 +538,24 @@ void Uno::showDiscard(Brobot* bro, Args& args) {
 		if (has_set_wild_color) {
 			switch(discard.back().type) {
 				case red:
-					bro->irc->privmsg(channel, "Current color is 4red!");
+					bro->irc->privmsg(channel, "Color is 4red!");
 					break;
 				case blue:
-					bro->irc->privmsg(channel, "Current color is 12blue!");
+					bro->irc->privmsg(channel, "Color is 12blue!");
 					break;
 				case green:
-					bro->irc->privmsg(channel, "Current color is 9green!");
+					bro->irc->privmsg(channel, "Color is 9green!");
 					break;
 				case yellow:
-					bro->irc->privmsg(channel, "Current color is 8yellow!!");
+					bro->irc->privmsg(channel, "Color is 8yellow!!");
 					break;
 			}
 		} else {
 			bro->irc->privmsg(channel, ""+current_player->nick+" has not yet set a color!");
 		}
-		if (discard.back().attr == drawfour && !current_player->has_drawn)
+		if (has_to_draw_cards && discard.back().attr == drawfour)
 			bro->irc->privmsg(channel, ""+current_player->nick+" must draw four cards!");
-	} else if (discard.back().attr == drawtwo && !current_player->has_drawn) {
+	} else if (has_to_draw_cards && discard.back().attr == drawtwo) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" must draw two cards!");
 	}
 };
@@ -528,6 +563,8 @@ void Uno::showDiscard(Brobot* bro, Args& args) {
 void Uno::nickHook(Brobot* bro, Args& args) {
 	if (started == 0)
 		return; // game hasn't started
+	if (uno_creator == args[1])
+		uno_creator = args[2];
 	std::vector<std::string>::iterator dropit = std::find(dropped_players.begin(), dropped_players.end(), args[1]);
 	if (dropit != dropped_players.end())
 		*dropit = args[2];
@@ -543,7 +580,7 @@ void Uno::partHook(Brobot* bro, Args& args) {
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
 		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
-			if (current_player == it)
+			if (started == 2 && current_player == it)
 				nextPlayer();
 			endGame(bro);
 			return;
@@ -566,7 +603,7 @@ void Uno::quitHook(Brobot* bro, Args& args) {
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
 		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
-			if (current_player == it)
+			if (started == 2 && current_player == it)
 				nextPlayer();
 			endGame(bro);
 			return;
@@ -588,8 +625,8 @@ void Uno::dropPlayer(Brobot* bro, Args& args) {
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
-		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
-			if (current_player == it)
+		if (players.size() == 1 || started == 1 || (players.size() <= 2 && started == 2)) {
+			if (started == 2 && current_player == it)
 				nextPlayer();
 			endGame(bro);
 			return;

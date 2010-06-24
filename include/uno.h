@@ -35,15 +35,17 @@ class Uno : public BaseModule {
 	std::vector<Card> deck;
 	std::vector<Card> discard;
 	std::string channel;
+	std::string uno_creator;
 	std::vector<Player>::iterator current_player;
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
-	bool has_set_wild_color;
+	bool has_set_wild_color, has_to_draw_cards;
 	public:
-	Uno() : started(0), has_set_wild_color(false) {};
+	Uno() : started(0), has_set_wild_color(false), has_to_draw_cards(false) {};
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
 	void reversePlayers();
 	void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
+	void swapDecks() { Card currdiscard = discard.back(); discard.pop_back(); deck.swap(discard); random_shuffle(deck.begin(), deck.end()); discard.push_back(currdiscard); };
 	void printCard(Brobot* bro, const std::string& target, bool notice, const Card& card);
 	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
 	void gameStart(Brobot* bro, Args& args);
