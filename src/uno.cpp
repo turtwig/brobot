@@ -1,7 +1,7 @@
 #include "..\include\uno.h"
 #include <fstream>
 
-Card::Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname) : number(num), type(col), attr(spec) {
+Uno::Card::Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname) : number(num), type(col), attr(spec) {
 	std::fstream file;
 	file.open((bro->stor->get("module.uno.dir")+fname).c_str(), std::ios::in);
     if (file) {

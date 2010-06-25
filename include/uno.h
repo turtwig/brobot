@@ -8,28 +8,25 @@
 #include "../include/Args.h"
 #include "../include/brobot.h"
 
-enum Cardtype { none_, red, blue, green, yellow };
-enum Cardattr { none, skip, reverse, drawtwo, drawfour, wild }; // drawfour is w+4, wild is just wild
-
-struct Card {
-	short int number; // -1 = special card
-	Cardtype type;
-	Cardattr attr;
-	std::string ascii[14];
-	Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname);
-	bool operator==(const Card& c) { return (number == c.number && type == c.type && attr == c.attr) || ((number == c.number) && (number == -1) && (attr == c.attr) && (attr == wild)) ||
-											((number == c.number) && (number == -1) && (attr == c.attr) && (attr == drawfour)); };
-};
-
-struct Player {
-	std::vector<Card> hand;
-	bool has_drawn;
-	std::string nick;
-	Player(const std::string& n) : nick(n), has_drawn(false) {};
-	bool operator==(const std::string& n) { return n == nick; };
-};
-
 class Uno : public BaseModule {
+	enum Cardtype { none_, red, blue, green, yellow };
+	enum Cardattr { none, skip, reverse, drawtwo, drawfour, wild }; // drawfour is w+4, wild is just wild
+	struct Card {
+		short int number; // -1 = special card
+		Cardtype type;
+		Cardattr attr;
+		std::string ascii[14];
+		Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname);
+		bool operator==(const Card& c) { return (number == c.number && type == c.type && attr == c.attr) || ((number == c.number) && (number == -1) && (attr == c.attr) && (attr == wild)) ||
+												((number == c.number) && (number == -1) && (attr == c.attr) && (attr == drawfour)); };
+	};
+	struct Player {
+		std::vector<Card> hand;
+		bool has_drawn;
+		std::string nick;
+		Player(const std::string& n) : nick(n), has_drawn(false) {};
+		bool operator==(const std::string& n) { return n == nick; };
+	};
 	// Cards definition
 	// Red
 	Card _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered;
