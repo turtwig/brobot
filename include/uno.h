@@ -10,7 +10,7 @@
 
 const std::string ascii_dir = "C:\\Users\\Admin\\Desktop\\ascii\\uno\\";
 
-enum Cardtype { red, blue, green, yellow };
+enum Cardtype { none_, red, blue, green, yellow };
 enum Cardattr { none, skip, reverse, drawtwo, drawfour, wild }; // drawfour is w+4, wild is just wild
 
 struct Card {
@@ -19,6 +19,8 @@ struct Card {
 	Cardattr attr;
 	std::string ascii[14];
 	Card(short int num, Cardtype col, Cardattr spec, const std::string& fname);
+	bool operator==(const Card& c) { return (number == c.number && type == c.type && attr == c.attr) || ((number == c.number) && (number == -1) && (attr == c.attr) && (attr == wild)) ||
+											((number == c.number) && (number == -1) && (attr == c.attr) && (attr == drawfour)); };
 };
 
 struct Player {
@@ -38,9 +40,9 @@ class Uno : public BaseModule {
 	std::string uno_creator;
 	std::vector<Player>::iterator current_player;
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
-	bool has_set_wild_color, has_to_draw_cards;
+	bool has_to_draw_cards;
 	public:
-	Uno() : started(0), has_set_wild_color(false), has_to_draw_cards(false) {};
+	Uno() : started(0), has_to_draw_cards(false) {};
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
 	void reversePlayers();
@@ -64,6 +66,7 @@ class Uno : public BaseModule {
 	void passTurn(Brobot* bro, Args& args);
 	void drawCard(Brobot* bro, Args& args);
 	void showHand(Brobot* bro, Args& args);
+	void playCard(Brobot* bro, Args& args);
 };
 
 // Cards definition
