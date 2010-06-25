@@ -100,6 +100,7 @@ void Brobot::parse(const std::string& s) {
 	        parserEvents.erase(it);
 	    }
 	}
+	parsers_to_delete.clear();
     typedef std::pair<std::string, boost::function<void (const std::string&)> > pair_t;
     BOOST_FOREACH( pair_t p, parserEvents )
         p.second(s); // each parser function is responsible for firing the appropriate hooks
