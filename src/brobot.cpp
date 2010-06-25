@@ -66,10 +66,7 @@ void Brobot::addParser(const std::string& name, boost::function<void (const std:
 };
 
 void Brobot::delParser(const std::string& name) {
-    std::map<std::string, boost::function<void (const std::string&)> >::iterator it = parserEvents.find(name);
-    if (it != parserEvents.end()) {
-        parserEvents.erase(it);
-    }
+	parsers_to_delete.push_back(name);
 };
 
 bool Brobot::loadMod(const std::string& name, BaseModule* module) {
@@ -97,6 +94,12 @@ BaseModule* Brobot::findMod(const std::string& name) {
 };
 
 void Brobot::parse(const std::string& s) {
+	BOOST_FOREACH( std::string name, parsers_to_delete) {
+		std::map<std::string, boost::function<void (const std::string&)> >::iterator it = parserEvents.find(name);
+		if (it != parserEvents.end()) {
+	        parserEvents.erase(it);
+	    }
+	}
     typedef std::pair<std::string, boost::function<void (const std::string&)> > pair_t;
     BOOST_FOREACH( pair_t p, parserEvents )
         p.second(s); // each parser function is responsible for firing the appropriate hooks

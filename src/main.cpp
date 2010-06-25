@@ -27,7 +27,7 @@ int main(int argc, char** argv, char** env) {
 		g_bro->hook("PerlTest", "OnPRIVMSG", boost::bind(&PerlTest, g_bro, _1));
         CoreModule core;
         g_bro->loadMod("Core", &core);
-		Uno unomod;
+		Uno unomod(g_bro);
 		g_bro->loadMod("Uno", &unomod);
         g_bro->start();
     } catch (std::exception& e) {

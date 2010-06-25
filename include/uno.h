@@ -3,12 +3,10 @@
 #include <cstdlib> // for itoa
 #include <string>
 #include <vector>
-#include <algorithm>
+#include <algorithm> // for random_shuffle
 #include "../include/BaseModule.h"
 #include "../include/Args.h"
 #include "../include/brobot.h"
-
-const std::string ascii_dir = "C:\\Users\\Admin\\Desktop\\ascii\\uno\\";
 
 enum Cardtype { none_, red, blue, green, yellow };
 enum Cardattr { none, skip, reverse, drawtwo, drawfour, wild }; // drawfour is w+4, wild is just wild
@@ -18,7 +16,7 @@ struct Card {
 	Cardtype type;
 	Cardattr attr;
 	std::string ascii[14];
-	Card(short int num, Cardtype col, Cardattr spec, const std::string& fname);
+	Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname);
 	bool operator==(const Card& c) { return (number == c.number && type == c.type && attr == c.attr) || ((number == c.number) && (number == -1) && (attr == c.attr) && (attr == wild)) ||
 											((number == c.number) && (number == -1) && (attr == c.attr) && (attr == drawfour)); };
 };
@@ -32,6 +30,17 @@ struct Player {
 };
 
 class Uno : public BaseModule {
+	// Cards definition
+	// Red
+	Card _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered;
+	// Blue
+	Card _0blue, _1blue, _2blue, _3blue, _4blue, _5blue, _6blue, _7blue, _8blue, _9blue, _p2blue, _skipblue, _reverseblue;
+	// Green
+	Card  _0green, _1green, _2green, _3green, _4green, _5green, _6green, _7green, _8green, _9green, _p2green, _skipgreen, _reversegreen;
+	// Yellow
+	Card _0yellow, _1yellow, _2yellow, _3yellow, _4yellow, _5yellow, _6yellow, _7yellow, _8yellow, _9yellow, _p2yellow, _skipyellow, _reverseyellow;
+	// Wilds
+	Card _wild, _p4wild;
 	std::vector<Player> players;
 	std::vector<std::string> dropped_players;
 	std::vector<Card> deck;
@@ -42,7 +51,24 @@ class Uno : public BaseModule {
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
 	unsigned short int has_to_draw_cards; // number of cards to draw
 	public:
-	Uno() : started(0), has_to_draw_cards(0) {};
+	Uno(Brobot* bro) : started(0), has_to_draw_cards(0),
+						_0red(bro, 0, red, none, "0red.txt"), _1red(bro, 1, red, none, "1red.txt"), _2red(bro, 2, red, none, "2red.txt"), _3red(bro, 3, red, none, "3red.txt"),
+						_4red(bro, 4, red, none, "4red.txt"), _5red(bro, 5, red, none, "5red.txt"), _6red(bro, 6, red, none, "6red.txt"), _7red(bro, 7, red, none, "7red.txt"),
+						_8red(bro, 8, red, none, "8red.txt"), _9red(bro, 9, red, none, "9red.txt"), _p2red(bro, -1, red, drawtwo, "+2red.txt"), _skipred(bro, -1, red, skip, "skipred.txt"),
+						_reversered(bro, -1, red, reverse, "reversered.txt"),
+						_0blue(bro, 0, blue, none, "0blue.txt"), _1blue(bro, 1, blue, none, "1blue.txt"), _2blue(bro, 2, blue, none, "2blue.txt"), _3blue(bro, 3, blue, none, "3blue.txt"),
+						_4blue(bro, 4, blue, none, "4blue.txt"), _5blue(bro, 5, blue, none, "5blue.txt"), _6blue(bro, 6, blue, none, "6blue.txt"), _7blue(bro, 7, blue, none, "7blue.txt"),
+						_8blue(bro, 8, blue, none, "8blue.txt"), _9blue(bro, 9, blue, none, "9blue.txt"), _p2blue(bro, -1, blue, drawtwo, "+2blue.txt"), _skipblue(bro, -1, blue, skip, "skipblue.txt"),
+						_reverseblue(bro, -1, blue, reverse, "reverseblue.txt"),
+						_0green(bro, 0, green, none, "0green.txt"), _1green(bro, 1, green, none, "1green.txt"), _2green(bro, 2, green, none, "2green.txt"), _3green(bro, 3, green, none, "3green.txt"),
+						_4green(bro, 4, green, none, "4green.txt"), _5green(bro, 5, green, none, "5green.txt"), _6green(bro, 6, green, none, "6green.txt"), _7green(bro, 7, green, none, "7green.txt"),
+						_8green(bro, 8, green, none, "8green.txt"), _9green(bro, 9, green, none, "9green.txt"), _p2green(bro, -1, green, drawtwo, "+2green.txt"), _skipgreen(bro, -1, green, skip, "skipgreen.txt"),
+						_reversegreen(bro, -1, green, reverse, "reversegreen.txt"),
+						_0yellow(bro, 0, yellow, none, "0yellow.txt"), _1yellow(bro, 1, yellow, none, "1yellow.txt"), _2yellow(bro, 2, yellow, none, "2yellow.txt"), _3yellow(bro, 3, yellow, none, "3yellow.txt"),
+						_4yellow(bro, 4, yellow, none, "4yellow.txt"), _5yellow(bro, 5, yellow, none, "5yellow.txt"), _6yellow(bro, 6, yellow, none, "6yellow.txt"), _7yellow(bro, 7, yellow, none, "7yellow.txt"),
+						_8yellow(bro, 8, yellow, none, "8yellow.txt"), _9yellow(bro, 9, yellow, none, "9yellow.txt"), _p2yellow(bro, -1, yellow, drawtwo, "+2yellow.txt"), _skipyellow(bro, -1, yellow, skip, "skipyellow.txt"),
+						_reverseyellow(bro, -1, yellow, reverse, "reverseyellow.txt"),
+						_wild(bro, -1, red, wild, "wild.txt"), _p4wild(bro, -1, red, drawfour, "wild+4.txt") {};
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
 	void reversePlayers();
@@ -69,66 +95,5 @@ class Uno : public BaseModule {
 	void playCard(Brobot* bro, Args& args);
 	void challenge(Brobot* bro, Args& args);
 };
-
-// Cards definition
-// Red
-const Card _0red(0, red, none, "0red.txt");
-const Card _1red(1, red, none, "1red.txt");
-const Card _2red(2, red, none, "2red.txt");
-const Card _3red(3, red, none, "3red.txt");
-const Card _4red(4, red, none, "4red.txt");
-const Card _5red(5, red, none, "5red.txt");
-const Card _6red(6, red, none, "6red.txt");
-const Card _7red(7, red, none, "7red.txt");
-const Card _8red(8, red, none, "8red.txt");
-const Card _9red(9, red, none, "9red.txt");
-const Card _p2red(-1, red, drawtwo, "+2red.txt");
-const Card _skipred(-1, red, skip, "skipred.txt");
-const Card _reversered(-1, red, reverse, "reversered.txt");
-// Blue
-const Card _0blue(0, blue, none, "0blue.txt");
-const Card _1blue(1, blue, none, "1blue.txt");
-const Card _2blue(2, blue, none, "2blue.txt");
-const Card _3blue(3, blue, none, "3blue.txt");
-const Card _4blue(4, blue, none, "4blue.txt");
-const Card _5blue(5, blue, none, "5blue.txt");
-const Card _6blue(6, blue, none, "6blue.txt");
-const Card _7blue(7, blue, none, "7blue.txt");
-const Card _8blue(8, blue, none, "8blue.txt");
-const Card _9blue(9, blue, none, "9blue.txt");
-const Card _p2blue(-1, blue, drawtwo, "+2blue.txt");
-const Card _skipblue(-1, blue, skip, "skipblue.txt");
-const Card _reverseblue(-1, blue, reverse, "reverseblue.txt");
-// Green
-const Card _0green(0, green, none, "0green.txt");
-const Card _1green(1, green, none, "1green.txt");
-const Card _2green(2, green, none, "2green.txt");
-const Card _3green(3, green, none, "3green.txt");
-const Card _4green(4, green, none, "4green.txt");
-const Card _5green(5, green, none, "5green.txt");
-const Card _6green(6, green, none, "6green.txt");
-const Card _7green(7, green, none, "7green.txt");
-const Card _8green(8, green, none, "8green.txt");
-const Card _9green(9, green, none, "9green.txt");
-const Card _p2green(-1, green, drawtwo, "+2green.txt");
-const Card _skipgreen(-1, green, skip, "skipgreen.txt");
-const Card _reversegreen(-1, green, reverse, "reversegreen.txt");
-// Yellow
-const Card _0yellow(0, yellow, none, "0yellow.txt");
-const Card _1yellow(1, yellow, none, "1yellow.txt");
-const Card _2yellow(2, yellow, none, "2yellow.txt");
-const Card _3yellow(3, yellow, none, "3yellow.txt");
-const Card _4yellow(4, yellow, none, "4yellow.txt");
-const Card _5yellow(5, yellow, none, "5yellow.txt");
-const Card _6yellow(6, yellow, none, "6yellow.txt");
-const Card _7yellow(7, yellow, none, "7yellow.txt");
-const Card _8yellow(8, yellow, none, "8yellow.txt");
-const Card _9yellow(9, yellow, none, "9yellow.txt");
-const Card _p2yellow(-1, yellow, drawtwo, "+2yellow.txt");
-const Card _skipyellow(-1, yellow, skip, "skipyellow.txt");
-const Card _reverseyellow(-1, yellow, reverse, "reverseyellow.txt");
-// Wilds (colors aren't checked in wilds, they are set)
-const Card _wild(-1, red, wild, "wild.txt");
-const Card _p4wild(-1, red, drawfour, "wild+4.txt");
 
 #endif // UNO_H_INCLUDED
