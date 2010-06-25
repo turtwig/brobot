@@ -1,6 +1,8 @@
 #include "..\include\uno.h"
 #include <fstream>
 
+// note to self: add .challenge; also do the same thing you did for hooks for parsers
+
 Card::Card(short int num, Cardtype col, Cardattr spec, const std::string& fname) : number(num), type(col), attr(spec) {
 	std::fstream file;
 	file.open((ascii_dir+fname).c_str(), std::ios::in);
@@ -187,7 +189,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
 			nextPlayer();
 			nextTurn(bro);
-		} else if (args[5][4] != 'w' && args[5].substr(5,2) == "+2" && (discard.back().type == color || discard.back().attr == drawtwo || discard.back().attr == drawfour)) {
+		} else if (args[5][4] != 'w' && args[5].substr(5,2) == "+2" && (discard.back().type == color || discard.back().attr == drawtwo || (discard.back().attr == drawfour && discard.back().type == color))) {
 			Card c(-1, color, drawtwo, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
