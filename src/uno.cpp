@@ -81,6 +81,7 @@ void Uno::help(Brobot* bro, Args& args) {
 	bro->irc->privmsg(args[4], ".hand               shows your hand");
 	bro->irc->privmsg(args[4], ".discard            shows current discard");
 	bro->irc->privmsg(args[4], ".players            shows playing order, current player and number of cards of each player");
+	bro->irc->privmsg(args[4], ".challenge          challenges a player after he played a wild +4");
 	bro->irc->privmsg(args[4], ".draw               draws a card");
 	bro->irc->privmsg(args[4], ".pass               passes turn");
 	bro->irc->privmsg(args[4], ".pl                 plays a card");
@@ -331,6 +332,43 @@ void Uno::playCard(Brobot* bro, Args& args) {
 	}
 };
 
+void Uno::challenge(Brobot* bro, Args& args) {
+	if (started != 2 || args[5] != ".challenge" || args[4] != channel)
+		return;
+	if (args[1] != current_player->nick) {
+		bro->irc->privmsg(channel, "It's not your turn!");
+		return;
+	}
+	if (discard.back().attr != drawfour && has_to_draw_cards < 4) {
+		bro->irc->privmsg(channel, "You can't do that!");
+		return;
+	}
+	std::vector<Player>::iterator previous_player = current_player;
+	if (previous_player == players.begin()) {
+		previous_player = --players.end();
+	} else {
+		--previous_player;
+	}
+	bool invalid = false;
+	BOOST_FOREACH(Card c, previous_player->hand) {
+		if (c.type == (discard.end()-2)->type) {
+			invalid = true;
+			break;
+		}
+	}
+	if (!invalid) {
+		has_to_draw_cards += 2;
+		char tmpbuf[10];
+		_itoa(has_to_draw_cards, tmpbuf, 10);
+		bro->irc->privmsg(channel, ""+previous_player->nick+"'s move was legal and "+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
+		return;
+	} else {
+		bro->irc->privmsg(channel, ""+previous_player->nick+"'s move was legal and has to draw 4 cards!");
+		current_player = previous_player;
+		nextTurn(bro);
+	}
+};
+
 void Uno::gameStart(Brobot* bro, Args& args) {
 	if (args[5] != ".uno" || args[4][0] != '#')
 		return;
@@ -354,6 +392,7 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 	bro->hook("[uno] showHand", "OnPRIVMSG", boost::bind(&Uno::showHand, this, bro, _1));
 	bro->hook("[uno] gameEnd", "OnPRIVMSG", boost::bind(&Uno::gameEnd, this, bro, _1));
 	bro->hook("[uno] playCard", "OnPRIVMSG", boost::bind(&Uno::playCard, this, bro, _1));
+	bro->hook("[uno] challenge", "OnPRIVMSG", boost::bind(&Uno::challenge, this, bro, _1));
 	bro->irc->privmsg(args[4], "Starting 4U8N3O12! game in "+args[4]+"!");
 	bro->irc->privmsg(args[4], "Say .join to join in and .start to start the game!");
 	// Deck cards
@@ -520,6 +559,7 @@ void Uno::endGame(Brobot* bro) {
 	deck.clear();
 	discard.clear();
 	current_player = players.end();
+	has_to_draw_cards = 0;
 	bro->unhook("[uno] joinHook", "OnPRIVMSG");
 	bro->unhook("[uno] listPlayers", "OnPRIVMSG");
 	bro->unhook("[uno] nickHook", "OnNICK");
@@ -533,6 +573,7 @@ void Uno::endGame(Brobot* bro) {
 	bro->unhook("[uno] showHand", "OnPRIVMSG");
 	bro->unhook("[uno] gameEnd", "OnPRIVMSG");
 	bro->unhook("[uno] playCard", "OnPRIVMSG");
+	bro->unhook("[uno] challenge", "OnPRIVMSG");
 };
 
 void Uno::startGame(Brobot* bro, Args& args) {

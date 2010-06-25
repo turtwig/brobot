@@ -67,6 +67,7 @@ class Uno : public BaseModule {
 	void drawCard(Brobot* bro, Args& args);
 	void showHand(Brobot* bro, Args& args);
 	void playCard(Brobot* bro, Args& args);
+	void challenge(Brobot* bro, Args& args);
 };
 
 // Cards definition
