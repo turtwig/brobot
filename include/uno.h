@@ -40,9 +40,9 @@ class Uno : public BaseModule {
 	std::string uno_creator;
 	std::vector<Player>::iterator current_player;
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
-	bool has_to_draw_cards;
+	unsigned short int has_to_draw_cards; // number of cards to draw
 	public:
-	Uno() : started(0), has_to_draw_cards(false) {};
+	Uno() : started(0), has_to_draw_cards(0) {};
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
 	void reversePlayers();

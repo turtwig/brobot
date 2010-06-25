@@ -83,8 +83,8 @@ void Uno::help(Brobot* bro, Args& args) {
 	bro->irc->privmsg(args[4], ".pass               passes turn");
 	bro->irc->privmsg(args[4], ".pl                 plays a card");
 	bro->irc->privmsg(args[4], " ");
-	bro->irc->privmsg(args[4], "Syntax for pl is: [rgby][0-9] (i.e. r1, b5, g6");
-	bro->irc->privmsg(args[4], "                  Special cards: r+2, rs, rr, w, w+4");
+	bro->irc->privmsg(args[4], "Syntax for pl is: [rgby][0-9] (i.e. r1, b5, g6)");
+	bro->irc->privmsg(args[4], "                  Special cards: r+2, rs, rr");
 	bro->irc->privmsg(args[4], "                  Wild and Wild+4s: w [rgby], w+4 [rgby] to specify a color");
 	bro->irc->privmsg(args[4], "You cannot join a game in progress.");
 	bro->irc->privmsg(args[4], "If you drop from a game you cannot re-join it.");
@@ -135,7 +135,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			return;
 	}
 	if (args[5][5] == 'r' || args[5][5] == 's' || args[5][5] == '+' || number == -1) {
-		if (!has_to_draw_cards && args[5][5] == 'r' && (discard.back().type == color || discard.back().attr == reverse)) {
+		if (has_to_draw_cards == 0 && args[5][5] == 'r' && (discard.back().type == color || discard.back().attr == reverse)) {
 			Card c(-1, color, reverse, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
@@ -164,7 +164,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 				nextPlayer();
 				nextTurn(bro);
 			}
-		} else if (!has_to_draw_cards && args[5][5] == 's' && (discard.back().type == color || discard.back().attr == skip)) {
+		} else if (has_to_draw_cards == 0 && args[5][5] == 's' && (discard.back().type == color || discard.back().attr == skip)) {
 			Card c(-1, color, skip, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
@@ -176,7 +176,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
-			has_to_draw_cards = false;
+			has_to_draw_cards = 0;
 			if (current_player->hand.empty()) {
 				endGame(bro);
 				return;
@@ -199,7 +199,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
-			has_to_draw_cards = true;
+			has_to_draw_cards += 2;
 			if (current_player->hand.empty()) {
 				endGame(bro);
 				return;
@@ -208,7 +208,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			}
 			nextPlayer();
 			nextTurn(bro);
-		} else if (args[5][4] == 'w' && args[5][5] != '+' && !has_to_draw_cards) {
+		} else if (args[5][4] == 'w' && args[5][5] != '+' && has_to_draw_cards == 0) {
 			char ch;
 			if (args[5][5] == ' ') {
 				ch = args[5][6];
@@ -245,7 +245,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
-			has_to_draw_cards = false;
+			has_to_draw_cards = 0;
 			if (current_player->hand.empty()) {
 				endGame(bro);
 				return;
@@ -291,7 +291,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
-			has_to_draw_cards = true;
+			has_to_draw_cards += 4;
 			if (current_player->hand.empty()) {
 				endGame(bro);
 				return;
@@ -303,7 +303,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 		} else {
 			bro->irc->privmsg(channel, "You can't play that card!");
 		}
-	} else if (!has_to_draw_cards && discard.back().type == color || discard.back().number == number) {
+	} else if (has_to_draw_cards == 0 && discard.back().type == color || discard.back().number == number) {
 		Card c(number, color, none, "");
 		std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 		if (it == current_player->hand.end()) {
@@ -315,7 +315,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 		discard.push_back(*it);
 		current_player->hand.erase(it);
 		current_player->has_drawn = false;
-		has_to_draw_cards = false;
+		has_to_draw_cards = 0;
 		if (current_player->hand.empty()) {
 			endGame(bro);
 			return;
@@ -577,7 +577,7 @@ void Uno::startGame(Brobot* bro, Args& args) {
 				break;
 		}
 		if (discard.back().attr == drawfour)
-			has_to_draw_cards = true;
+			has_to_draw_cards += 4;
 		nextTurn(bro);
 	} else if (discard.back().attr == skip) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
@@ -604,7 +604,7 @@ void Uno::startGame(Brobot* bro, Args& args) {
 			nextTurn(bro);
 		}
 	} else if (discard.back().attr == drawtwo) {
-		has_to_draw_cards = true;
+		has_to_draw_cards += 2;
 		nextTurn(bro);
 	}
 };
@@ -638,44 +638,21 @@ void Uno::drawCard(Brobot* bro, Args& args) {
 		bro->irc->privmsg(channel, "You have already drawn a card!");
 		return;
 	}
-	if (has_to_draw_cards && discard.back().attr == drawtwo) {
-		bro->irc->privmsg(channel, ""+args[1]+" must draw two cards!");
+	if (has_to_draw_cards != 0) {
+		char tmpbuf[10];
+		_itoa(has_to_draw_cards, tmpbuf, 10);
+		bro->irc->privmsg(channel, ""+args[1]+" must draw "+std::string(tmpbuf)+" cards!");
 		std::vector<Card> drawncards;
-		drawncards.push_back(deck.back());
-		deck.pop_back();
-		if (deck.empty())
-			swapDecks();
-		drawncards.push_back(deck.back());
-		deck.pop_back();
-		if (deck.empty())
-			swapDecks();
+		for (int i = 0; i < has_to_draw_cards; i++) {
+			drawncards.push_back(deck.back());
+			deck.pop_back();
+			if (deck.empty())
+				swapDecks();
+		}
 		bro->irc->notice(args[1], "You have drawn:");
 		printCard(bro, args[1], true, drawncards);
 		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
-		has_to_draw_cards = false;
-	} else if (has_to_draw_cards && discard.back().attr == drawfour) {
-		bro->irc->privmsg(channel, ""+args[1]+" must draw four cards!");
-		std::vector<Card> drawncards;
-		drawncards.push_back(deck.back());
-		deck.pop_back();
-		if (deck.empty())
-			swapDecks();
-		drawncards.push_back(deck.back());
-		deck.pop_back();
-		if (deck.empty())
-			swapDecks();
-		drawncards.push_back(deck.back());
-		deck.pop_back();
-		if (deck.empty())
-			swapDecks();
-		drawncards.push_back(deck.back());
-		deck.pop_back();
-		if (deck.empty())
-			swapDecks();
-		bro->irc->notice(args[1], "You have drawn:");
-		printCard(bro, args[1], true, drawncards);
-		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
-		has_to_draw_cards = false;
+		has_to_draw_cards = 0;
 	} else {
 		it->hand.push_back(deck.back());
 		bro->irc->privmsg(channel, ""+args[1]+" draws a card!");
@@ -698,7 +675,7 @@ void Uno::passTurn(Brobot* bro, Args& args) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
 	}
-	if (!it->has_drawn || has_to_draw_cards) {
+	if (!it->has_drawn || has_to_draw_cards != 0) {
 		bro->irc->privmsg(channel, "You need to draw a card first!");
 		return;
 	}
@@ -723,10 +700,10 @@ void Uno::showHand(Brobot* bro, Args& args) {
 void Uno::nextTurn(Brobot* bro) {
 	bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
 	if (discard.back().attr == none) {
-	} else if (has_to_draw_cards && discard.back().attr == drawtwo) {
-		bro->irc->privmsg(channel, ""+current_player->nick+" must draw two cards!");
-	} else if (has_to_draw_cards && discard.back().attr == drawfour) {
-		bro->irc->privmsg(channel, ""+current_player->nick+" must draw four cards!");
+	} else if (has_to_draw_cards != 0) {
+		char tmpbuf[10];
+		_itoa(has_to_draw_cards, tmpbuf, 10);
+		bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
 	}
 	if (discard.back().attr == wild || discard.back().attr == drawfour) {
 		switch(discard.back().type) {
@@ -827,10 +804,11 @@ void Uno::showDiscard(Brobot* bro, Args& args) {
 				bro->irc->privmsg(channel, "Color is 8yellow!!");
 				break;
 		}
-		if (has_to_draw_cards && discard.back().attr == drawfour)
-			bro->irc->privmsg(channel, ""+current_player->nick+" must draw four cards!");
-	} else if (has_to_draw_cards && discard.back().attr == drawtwo) {
-		bro->irc->privmsg(channel, ""+current_player->nick+" must draw two cards!");
+	}
+	if (has_to_draw_cards != 0) {
+		char tmpbuf[10];
+		_itoa(has_to_draw_cards, tmpbuf, 10);
+		bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
 	}
 };
 
