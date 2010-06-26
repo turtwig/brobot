@@ -532,6 +532,19 @@ void Uno::endGame(Brobot* bro) {
 	bro->irc->privmsg(channel, "4U8N3O12! game in "+channel+" ended!");
 	if (players.size() > 1) {
 		std::string winner = current_player->nick;
+		if (has_to_draw_cards != 0) {
+			nextPlayer();
+			char tmpbuf[10];
+			_itoa(has_to_draw_cards, tmpbuf, 10);
+			bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
+			for (int i = 0; i < has_to_draw_cards; i++) {
+				current_player->hand.push_back(deck.back());
+				deck.pop_back();
+				if (deck.empty())
+					swapDecks();
+			}
+			current_player = std::find(players.begin(), players.end(), winner);
+		}
 		players.erase(current_player);
 		unsigned int score = 0;
 		BOOST_FOREACH(Player p, players) {
