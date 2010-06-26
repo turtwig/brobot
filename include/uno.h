@@ -27,17 +27,12 @@ class Uno : public BaseModule {
 		Player(const std::string& n) : nick(n), has_drawn(false) {};
 		bool operator==(const std::string& n) { return n == nick; };
 	};
-	// Cards definition
-	// Red
-	Card _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered;
-	// Blue
-	Card _0blue, _1blue, _2blue, _3blue, _4blue, _5blue, _6blue, _7blue, _8blue, _9blue, _p2blue, _skipblue, _reverseblue;
-	// Green
-	Card  _0green, _1green, _2green, _3green, _4green, _5green, _6green, _7green, _8green, _9green, _p2green, _skipgreen, _reversegreen;
-	// Yellow
-	Card _0yellow, _1yellow, _2yellow, _3yellow, _4yellow, _5yellow, _6yellow, _7yellow, _8yellow, _9yellow, _p2yellow, _skipyellow, _reverseyellow;
-	// Wilds
-	Card _wild, _p4wild;
+	// Cards
+	Card _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered,
+		_0blue, _1blue, _2blue, _3blue, _4blue, _5blue, _6blue, _7blue, _8blue, _9blue, _p2blue, _skipblue, _reverseblue,
+		_0green, _1green, _2green, _3green, _4green, _5green, _6green, _7green, _8green, _9green, _p2green, _skipgreen, _reversegreen,
+		_0yellow, _1yellow, _2yellow, _3yellow, _4yellow, _5yellow, _6yellow, _7yellow, _8yellow, _9yellow, _p2yellow, _skipyellow, _reverseyellow,
+		_wild, _p4wild;
 	std::vector<Player> players;
 	std::vector<std::string> dropped_players;
 	std::vector<Card> deck;
@@ -47,6 +42,13 @@ class Uno : public BaseModule {
 	std::vector<Player>::iterator current_player;
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
 	unsigned short int has_to_draw_cards; // number of cards to draw
+	void reversePlayers();
+	void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
+	void swapDecks() { Card currdiscard = discard.back(); discard.pop_back(); deck.swap(discard); random_shuffle(deck.begin(), deck.end()); discard.push_back(currdiscard); };
+	void printCard(Brobot* bro, const std::string& target, bool notice, const Card& card);
+	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
+	void nextTurn(Brobot* bro);
+	void endGame(Brobot* bro);
 	public:
 	Uno(Brobot* bro) : started(0), has_to_draw_cards(0),
 						_0red(bro, 0, red, none, "0red.txt"), _1red(bro, 1, red, none, "1red.txt"), _2red(bro, 2, red, none, "2red.txt"), _3red(bro, 3, red, none, "3red.txt"),
@@ -68,11 +70,7 @@ class Uno : public BaseModule {
 						_wild(bro, -1, red, wild, "wild.txt"), _p4wild(bro, -1, red, drawfour, "wild+4.txt") {};
 	void onLoad(Brobot* bro);
 	void onUnload(Brobot* bro);
-	void reversePlayers();
-	void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
-	void swapDecks() { Card currdiscard = discard.back(); discard.pop_back(); deck.swap(discard); random_shuffle(deck.begin(), deck.end()); discard.push_back(currdiscard); };
-	void printCard(Brobot* bro, const std::string& target, bool notice, const Card& card);
-	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
+	// Hooks
 	void gameStart(Brobot* bro, Args& args);
 	void help(Brobot* bro, Args& args);
 	void joinHook(Brobot* bro, Args& args);
@@ -81,11 +79,9 @@ class Uno : public BaseModule {
 	void partHook(Brobot* bro, Args& args);
 	void quitHook(Brobot* bro, Args& args);
 	void dropPlayer(Brobot* bro, Args& args);
-	void endGame(Brobot* bro);
 	void gameEnd(Brobot* bro, Args& args); // handles .endgame
 	void startGame(Brobot* bro, Args& args); // handles .start rather than .uno
 	void showDiscard(Brobot* bro, Args& args);
-	void nextTurn(Brobot* bro);
 	void passTurn(Brobot* bro, Args& args);
 	void drawCard(Brobot* bro, Args& args);
 	void showHand(Brobot* bro, Args& args);
