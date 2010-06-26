@@ -1,6 +1,6 @@
 #ifndef UNO_H_INCLUDED
 #define UNO_H_INCLUDED
-#include <cstdlib> // for itoa
+#include <cstdlib> // for itoa/atoi
 #include <string>
 #include <vector>
 #include <algorithm> // for random_shuffle
@@ -28,7 +28,7 @@ class Uno : public BaseModule {
 		bool operator==(const std::string& n) { return n == nick; };
 	};
 	// Cards
-	Card _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered,
+	const Card _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered,
 		_0blue, _1blue, _2blue, _3blue, _4blue, _5blue, _6blue, _7blue, _8blue, _9blue, _p2blue, _skipblue, _reverseblue,
 		_0green, _1green, _2green, _3green, _4green, _5green, _6green, _7green, _8green, _9green, _p2green, _skipgreen, _reversegreen,
 		_0yellow, _1yellow, _2yellow, _3yellow, _4yellow, _5yellow, _6yellow, _7yellow, _8yellow, _9yellow, _p2yellow, _skipyellow, _reverseyellow,
@@ -79,8 +79,8 @@ class Uno : public BaseModule {
 	void partHook(Brobot* bro, Args& args);
 	void quitHook(Brobot* bro, Args& args);
 	void dropPlayer(Brobot* bro, Args& args);
-	void gameEnd(Brobot* bro, Args& args); // handles .endgame
-	void startGame(Brobot* bro, Args& args); // handles .start rather than .uno
+	void gameEnd(Brobot* bro, Args& args);
+	void startGame(Brobot* bro, Args& args);
 	void showDiscard(Brobot* bro, Args& args);
 	void passTurn(Brobot* bro, Args& args);
 	void drawCard(Brobot* bro, Args& args);
