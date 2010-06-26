@@ -20,12 +20,6 @@ void Brobot::start() {
     sock->connect();
     irc->user(stor->get("core.ident"), stor->get("core.real"));
     irc->nick(stor->get("core.nick"));
-    if (std::strcmp(stor->getcstr("core.oper"),"1") == 0) { // we can oper up
-        irc->oper(stor->get("core.operlogin"), stor->get("core.operpass"));
-    }
-    if (std::strcmp(stor->getcstr("core.nickserv"),"1") == 0) { // we need to identify
-        irc->privmsg("NickServ", "IDENTIFY " + stor->get("core.nickpass"));
-    }
     while(true) {
         parse(sock->read());
     }

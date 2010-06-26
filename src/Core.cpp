@@ -1,5 +1,4 @@
 #include "../include/Core.h"
-#include <iostream>
 
 void CoreModule::onLoad(Brobot* bro) {
     // Parser functions
@@ -11,6 +10,7 @@ void CoreModule::onLoad(Brobot* bro) {
 	bro->addParser("quit", boost::bind(&CoreModule::quit, this, bro, _1));
     // Hooks
     bro->hook("[core] Ping", "OnPING", boost::bind(&CoreModule::pingHook, this, bro, _1));
+	bro->hook("[core] OnConnect", "Numeric001", boost::bind(&CoreModule::onconnect, this, bro, _1));
 };
 
 void CoreModule::onUnload(Brobot* bro) {
@@ -114,4 +114,23 @@ void CoreModule::ping(Brobot* bro, const std::string& str) {
 // Responds to PING
 void CoreModule::pingHook(Brobot* bro, Args& arg) {
     bro->irc->raw("PONG " + arg[0]); // simply respond to the PING
+};
+
+void CoreModule::onconnect(Brobot* bro, Args& arg) {
+	if (std::strcmp(bro->stor->getcstr("core.oper"),"1") == 0) { // we can oper up
+        bro->irc->oper(bro->stor->get("core.operlogin"), bro->stor->get("core.operpass"));
+    }
+    if (std::strcmp(bro->stor->getcstr("core.nickserv"),"1") == 0) { // we need to identify
+        bro->irc->privmsg("NickServ", "IDENTIFY " + bro->stor->get("core.nickpass"));
+    }
+	unsigned short int h = 0;
+	std::string str = "";
+	do {
+		char tmpbuf[5];
+		_itoa(h, tmpbuf, 10);
+		str = bro->stor->get("core.onconnect."+std::string(tmpbuf));
+		bro->irc->raw(str);
+		++h;
+	} while(str != "");
+	bro->unhook("[core] OnConnect", "Numeric001"); // this hook only needs to run once
 };

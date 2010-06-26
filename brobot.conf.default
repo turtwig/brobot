@@ -14,7 +14,15 @@ core.operpass scum
 // NickServ shit
 core.nickserv 0
 core.nickpass fag
+// commands to do after connecting
+// counting starts at 0
+core.onconnect.0 JOIN #faggots
+core.onconnect.1 PART #faggots :emopart
 // Ascii shit
-module.ascii.dir C:\some\ascii\path
+module.ascii.dir C:\some\ascii\path\
 // or
 //module.ascii.dir /some/ascii/
+// Uno
+module.uno.dir C:\some\path\leading\to\uno\asciis\
+// or
+//module.uno.dir /some/path/
