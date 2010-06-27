@@ -60,7 +60,7 @@ class Brobot : private boost::noncopyable {
 
     std::map<std::string, boost::function<void (const std::string&)> > parserEvents; // map of functions to call on each run of parse(), (name, function)
 
-	std::vector<std::pair<std::string, std::string> > hooks_to_unhook; // map of hooks to be unhooked on the next runHooks()
+	std::vector<std::pair<std::string, std::string> > hooks_to_unhook; // list of hooks to be unhooked on the next runHooks()
 	std::vector<std::string> parsers_to_delete; // list of parsers to delete on next parse();
 
     public:
@@ -76,6 +76,7 @@ class Brobot : private boost::noncopyable {
     bool loadMod(const std::string& name, BaseModule* module);
     bool unloadMod(const std::string& name);
     BaseModule* findMod(const std::string& name); // returns NULL if module not found
+	std::vector<std::string> listMods();
 
     void addParser(const std::string& name, boost::function<void (const std::string&)> func);
     void delParser(const std::string& name);
@@ -92,7 +93,5 @@ class Brobot : private boost::noncopyable {
 };
 
 #include "../include/IRC.h" // member functions for easy IRC control, must be included after Brobot due to proper type qualifications
-
-//Brobot* current_bro(); // returns a pointer active/current Brobot instance, used for XSUBs
 
 #endif // BROBOT_H_INCLUDED

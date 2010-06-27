@@ -18,6 +18,12 @@ core.nickpass fag
 // counting starts at 0
 core.onconnect.0 JOIN #faggots
 core.onconnect.1 PART #faggots :emopart
+// owner stuff
+// set those to your own
+// only the person matching all three can do bot operations
+core.owner.nick homo
+core.owner.ident fag
+core.owner.host sucksdicks.com
 // Ascii shit
 module.ascii.dir C:\some\ascii\path\
 // or

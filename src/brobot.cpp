@@ -87,6 +87,15 @@ BaseModule* Brobot::findMod(const std::string& name) {
     return it->second;
 };
 
+std::vector<std::string> Brobot::listMods() {
+	std::vector<std::string> vec;
+	typedef std::pair<std::string, BaseModule*> pair_t;
+	BOOST_FOREACH(pair_t pair, modules) {
+		vec.push_back(pair.first);
+	}
+	return vec;
+};
+
 void Brobot::parse(const std::string& s) {
 	BOOST_FOREACH( std::string name, parsers_to_delete) {
 		std::map<std::string, boost::function<void (const std::string&)> >::iterator it = parserEvents.find(name);

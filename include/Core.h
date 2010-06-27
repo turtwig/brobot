@@ -4,12 +4,17 @@
 #include "../include/BaseModule.h"
 #include "../include/Args.h"
 #include "../include/brobot.h"
+#include <map>
+#include <vector>
 #include <cstdlib> // for itoa
 #include <string>
 #include <boost/regex.hpp>
 
 class CoreModule : public BaseModule {
+	std::map<std::string, BaseModule*> all_mods; // hold a BaseModule* pointer for every module that gets registered so we can load/unload them
     public:
+	void module(const std::string& name, BaseModule* mod);
+	// Brobot stuff:
     void onLoad(Brobot* bro);
     void onUnload(Brobot* bro);
 	// Parsers
@@ -22,6 +27,9 @@ class CoreModule : public BaseModule {
 	// Hooks
 	void onconnect(Brobot* bro, Args& arg);
     void pingHook(Brobot* bro, Args& arg);
+	void modulelist(Brobot* bro, Args& args);
+	void moduleunload(Brobot* bro, Args& args);
+	void moduleload(Brobot* bro, Args& args);
 };
 
 #endif // CORE_H_INCLUDED

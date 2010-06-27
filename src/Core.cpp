@@ -11,6 +11,9 @@ void CoreModule::onLoad(Brobot* bro) {
     // Hooks
     bro->hook("[core] Ping", "OnPING", boost::bind(&CoreModule::pingHook, this, bro, _1));
 	bro->hook("[core] OnConnect", "Numeric001", boost::bind(&CoreModule::onconnect, this, bro, _1));
+	bro->hook("[core] ModuleList", "OnPRIVMSG", boost::bind(&CoreModule::modulelist, this, bro, _1));
+	bro->hook("[core] ModuleUnload", "OnPRIVMSG", boost::bind(&CoreModule::moduleunload, this, bro, _1));
+	bro->hook("[core] ModuleLoad", "OnPRIVMSG", boost::bind(&CoreModule::moduleload, this, bro, _1));
 };
 
 void CoreModule::onUnload(Brobot* bro) {
@@ -23,6 +26,9 @@ void CoreModule::onUnload(Brobot* bro) {
 	bro->delParser("quit");
     // Hooks
     bro->unhook("[core] Ping", "OnPING");
+	bro->unhook("[core] ModuleList", "OnPRIVMSG");
+	bro->unhook("[core] ModuleUnload", "OnPRIVMSG");
+	bro->unhook("[core] ModuleLoad", "OnPRIVMSG");
 };
 
 /* Calls numeric hooks.
@@ -133,4 +139,62 @@ void CoreModule::onconnect(Brobot* bro, Args& arg) {
 		++h;
 	} while(str != "");
 	bro->unhook("[core] OnConnect", "Numeric001"); // this hook only needs to run once
+};
+
+void CoreModule::module(const std::string& name, BaseModule* mod) {
+	all_mods[name] = mod;
+};
+
+void CoreModule::modulelist(Brobot* bro, Args& args) {
+	if (args[5] != ".modlist" || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
+		return;
+	std::string target;
+	if (args[4][0] == '#') {
+		target = args[4];
+	} else {
+		target = args[1];
+	}
+	bro->irc->privmsg(target, "Modules loaded:");
+	BOOST_FOREACH(std::string mod, bro->listMods()) {
+		bro->irc->privmsg(target, " * "+mod);
+	}
+};
+
+void CoreModule::moduleunload(Brobot* bro, Args& args) {
+	if (args[5].substr(0,11) != ".modunload " || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
+		return;
+	std::string target;
+	if (args[4][0] == '#') {
+		target = args[4];
+	} else {
+		target = args[1];
+	}
+	bool success = bro->unloadMod(args[5].substr(11,std::string::npos));
+	if (success) {
+		bro->irc->privmsg(target, "Successfully unloaded "+args[5].substr(11,std::string::npos));
+	} else {
+		bro->irc->privmsg(target, "Could not unload "+args[5].substr(11,std::string::npos));
+	}
+};
+
+void CoreModule::moduleload(Brobot* bro, Args& args) {
+	if (args[5].substr(0,9) != ".modload " || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
+		return;
+	std::string target;
+	if (args[4][0] == '#') {
+		target = args[4];
+	} else {
+		target = args[1];
+	}
+	std::map<std::string, BaseModule*>::iterator it = all_mods.find(args[5].substr(9,std::string::npos));
+	if (it == all_mods.end()) {
+		bro->irc->privmsg(target, "Could not find module "+args[5].substr(9,std::string::npos));
+	} else {
+		bool success = bro->loadMod(args[5].substr(9,std::string::npos), it->second);
+		if (success) {
+			bro->irc->privmsg(target, "Successfully loaded "+args[5].substr(9,std::string::npos));
+		} else {
+			bro->irc->privmsg(target, "Could not load "+args[5].substr(9,std::string::npos));
+		}
+	}
 };
