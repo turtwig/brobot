@@ -3,6 +3,7 @@
 #include <cstdlib> // for itoa/atoi
 #include <string>
 #include <vector>
+#include <fstream>
 #include <algorithm> // for random_shuffle
 #include "../include/BaseModule.h"
 #include "../include/Args.h"

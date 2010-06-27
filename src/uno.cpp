@@ -1,7 +1,8 @@
 #include "..\include\uno.h"
-#include <fstream>
 
 Uno::Card::Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname) : number(num), type(col), attr(spec) {
+	if (fname == "")
+		return;
 	std::fstream file;
 	file.open((bro->stor->get("module.uno.dir")+fname).c_str(), std::ios::in);
     if (file) {
@@ -137,7 +138,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 	}
 	if (args[5][5] == 'r' || args[5][5] == 's' || args[5][5] == '+' || number == -1) {
 		if (has_to_draw_cards == 0 && args[5][5] == 'r' && (discard.back().type == color || discard.back().attr == reverse)) {
-			Card c(bro, -1, color, reverse, "");
+			Card c(NULL, -1, color, reverse, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
 				bro->irc->privmsg(channel, "You don't have that card!");
@@ -166,7 +167,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 				nextTurn(bro);
 			}
 		} else if (has_to_draw_cards == 0 && args[5][5] == 's' && (discard.back().type == color || discard.back().attr == skip)) {
-			Card c(bro, -1, color, skip, "");
+			Card c(NULL, -1, color, skip, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
 				bro->irc->privmsg(channel, "You don't have that card!");
@@ -189,7 +190,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			nextPlayer();
 			nextTurn(bro);
 		} else if (args[5][4] != 'w' && args[5].substr(5,2) == "+2" && (discard.back().type == color || discard.back().attr == drawtwo || (discard.back().attr == drawfour && discard.back().type == color))) {
-			Card c(bro, -1, color, drawtwo, "");
+			Card c(NULL, -1, color, drawtwo, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
 				bro->irc->privmsg(channel, "You don't have that card!");
@@ -234,7 +235,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 					bro->irc->privmsg(channel, "You need to specify a color!");
 					return;
 			}
-			Card c(bro, -1, none_, wild, "");
+			Card c(NULL, -1, none_, wild, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
 				bro->irc->privmsg(channel, "You don't have that card!");
@@ -280,7 +281,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 					bro->irc->privmsg(channel, "You need to specify a color!");
 					return;
 			}
-			Card c(bro, -1, none_, drawfour, "");
+			Card c(NULL, -1, none_, drawfour, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
 				bro->irc->privmsg(channel, "You don't have that card!");
@@ -305,7 +306,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			bro->irc->privmsg(channel, "You can't play that card!");
 		}
 	} else if (has_to_draw_cards == 0 && discard.back().type == color || discard.back().number == number) {
-		Card c(bro, number, color, none, "");
+		Card c(NULL, number, color, none, "");
 		std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 		if (it == current_player->hand.end()) {
 			bro->irc->privmsg(channel, "You don't have that card!");
