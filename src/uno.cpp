@@ -84,6 +84,8 @@ void Uno::help(Brobot* bro, Args& args) {
 	bro->irc->privmsg(args[4], ".draw               draws a card");
 	bro->irc->privmsg(args[4], ".pass               passes turn");
 	bro->irc->privmsg(args[4], ".pl                 plays a card");
+	bro->irc->privmsg(args[4], ".skip               makes the current player draw a card and pass his turn");
+	bro->irc->privmsg(args[4], "                    this command only works if a minute has passed since the player's turn started");
 	bro->irc->privmsg(args[4], " ");
 	bro->irc->privmsg(args[4], "Syntax for pl is: [rgby][0-9] (i.e. r1, b5, g6)");
 	bro->irc->privmsg(args[4], "                  Special cards: r+2, rs, rr");
@@ -149,6 +151,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
+			current_player->has_challenged = false;
 			if (current_player->hand.empty()) {
 				endGame(bro);
 				return;
@@ -178,6 +181,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
+			current_player->has_challenged = false;
 			has_to_draw_cards = 0;
 			if (current_player->hand.empty()) {
 				endGame(bro);
@@ -201,6 +205,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
+			current_player->has_challenged = false;
 			has_to_draw_cards += 2;
 			if (current_player->hand.empty()) {
 				endGame(bro);
@@ -247,6 +252,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
+			current_player->has_challenged = false;
 			has_to_draw_cards = 0;
 			if (current_player->hand.empty()) {
 				endGame(bro);
@@ -293,6 +299,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			discard.push_back(*it);
 			current_player->hand.erase(it);
 			current_player->has_drawn = false;
+			current_player->has_challenged = false;
 			has_to_draw_cards += 4;
 			if (current_player->hand.empty()) {
 				endGame(bro);
@@ -317,6 +324,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 		discard.push_back(*it);
 		current_player->hand.erase(it);
 		current_player->has_drawn = false;
+		current_player->has_challenged = false;
 		has_to_draw_cards = 0;
 		if (current_player->hand.empty()) {
 			endGame(bro);
@@ -338,10 +346,11 @@ void Uno::challenge(Brobot* bro, Args& args) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
 	}
-	if (discard.back().attr != drawfour && has_to_draw_cards < 4) {
+	if (current_player->has_challenged || (discard.back().attr != drawfour && has_to_draw_cards < 4)) {
 		bro->irc->privmsg(channel, "You can't do that!");
 		return;
 	}
+	current_player->has_challenged = true;
 	std::vector<Player>::iterator previous_player = current_player;
 	if (previous_player == players.begin()) {
 		previous_player = --players.end();
@@ -365,7 +374,9 @@ void Uno::challenge(Brobot* bro, Args& args) {
 		char tmpbuf[10];
 		_itoa(has_to_draw_cards, tmpbuf, 10);
 		bro->irc->privmsg(channel, ""+previous_player->nick+"'s move was illegal and has to draw "+std::string(tmpbuf)+" cards!");
+		current_player->has_challenged = false; // challenge was successful
 		current_player = previous_player;
+		current_player->has_challenged = true; // the previous player can't challenge himself
 		nextTurn(bro);
 	}
 };
@@ -394,6 +405,7 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 	bro->hook("[uno] gameEnd", "OnPRIVMSG", boost::bind(&Uno::gameEnd, this, bro, _1));
 	bro->hook("[uno] playCard", "OnPRIVMSG", boost::bind(&Uno::playCard, this, bro, _1));
 	bro->hook("[uno] challenge", "OnPRIVMSG", boost::bind(&Uno::challenge, this, bro, _1));
+	bro->hook("[uno] skipTurn", "OnPRIVMSG", boost::bind(&Uno::skipTurn, this, bro, _1));
 	bro->irc->privmsg(args[4], "Starting 4U8N3O12! game in "+args[4]+"!");
 	bro->irc->privmsg(args[4], "Say .join to join in and .start to start the game!");
 	// Deck cards
@@ -537,7 +549,7 @@ void Uno::endGame(Brobot* bro) {
 			nextPlayer();
 			char tmpbuf[10];
 			_itoa(has_to_draw_cards, tmpbuf, 10);
-			bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
+			bro->irc->privmsg(channel, ""+current_player->nick+" draws "+std::string(tmpbuf)+" cards!");
 			for (int i = 0; i < has_to_draw_cards; i++) {
 				current_player->hand.push_back(deck.back());
 				deck.pop_back();
@@ -588,6 +600,60 @@ void Uno::endGame(Brobot* bro) {
 	bro->unhook("[uno] gameEnd", "OnPRIVMSG");
 	bro->unhook("[uno] playCard", "OnPRIVMSG");
 	bro->unhook("[uno] challenge", "OnPRIVMSG");
+	bro->unhook("[uno] skipTurn", "OnPRIVMSG");
+};
+
+void Uno::skipTurn(Brobot* bro, Args& args) {
+	if (started != 2 || args[4] != channel || args[5] != ".skip")
+		return;
+	if (turntimer.elapsed() < 60) {
+		char tmpbuf[10];
+		_itoa(60-turntimer.elapsed(), tmpbuf, 10);
+		bro->irc->privmsg(channel, "You need to wait "+std::string(tmpbuf)+" more seconds!");
+		return;
+	}
+	bro->irc->privmsg(channel, ""+current_player->nick+" is taking too long to play and has been skipped!");
+	if (current_player->has_drawn) {
+		current_player->has_drawn = false;
+		current_player->has_challenged = false;
+		nextPlayer();
+		bro->irc->privmsg(channel, "Current discard:");
+		printCard(bro, channel, false, discard.back());
+		nextTurn(bro);
+	} else {
+		if (has_to_draw_cards != 0) {
+			char tmpbuf[10];
+			_itoa(has_to_draw_cards, tmpbuf, 10);
+			bro->irc->privmsg(channel, ""+current_player->nick+" draws "+std::string(tmpbuf)+" cards!");
+			std::vector<Card> drawncards;
+			for (int i = 0; i < has_to_draw_cards; i++) {
+				drawncards.push_back(deck.back());
+				deck.pop_back();
+				if (deck.empty())
+					swapDecks();
+			}
+			current_player->hand.insert(current_player->hand.end(), drawncards.begin(), drawncards.end());
+			has_to_draw_cards = 0;
+			current_player->has_drawn = false;
+			current_player->has_challenged = false;
+			nextPlayer();
+			bro->irc->privmsg(channel, "Current discard:");
+			printCard(bro, channel, false, discard.back());
+			nextTurn(bro);
+		} else {
+			current_player->hand.push_back(deck.back());
+			bro->irc->privmsg(channel, ""+current_player->nick+" draws a card!");
+			deck.pop_back();
+			if (deck.empty())
+				swapDecks();
+			current_player->has_drawn = false;
+			current_player->has_challenged = false;
+			nextPlayer();
+			bro->irc->privmsg(channel, "Current discard:");
+			printCard(bro, channel, false, discard.back());
+			nextTurn(bro);
+		}
+	}
 };
 
 void Uno::startGame(Brobot* bro, Args& args) {
@@ -698,7 +764,7 @@ void Uno::drawCard(Brobot* bro, Args& args) {
 	if (has_to_draw_cards != 0) {
 		char tmpbuf[10];
 		_itoa(has_to_draw_cards, tmpbuf, 10);
-		bro->irc->privmsg(channel, ""+args[1]+" must draw "+std::string(tmpbuf)+" cards!");
+		bro->irc->privmsg(channel, ""+args[1]+" draws "+std::string(tmpbuf)+" cards!");
 		std::vector<Card> drawncards;
 		for (int i = 0; i < has_to_draw_cards; i++) {
 			drawncards.push_back(deck.back());
@@ -738,6 +804,7 @@ void Uno::passTurn(Brobot* bro, Args& args) {
 	}
 	bro->irc->privmsg(channel, ""+args[1]+" passes his turn!");
 	it->has_drawn = false;
+	it->has_challenged = false;
 	nextPlayer();
 	bro->irc->privmsg(args[4], "Current discard:");
 	printCard(bro, channel, false, discard.back());
@@ -755,6 +822,7 @@ void Uno::showHand(Brobot* bro, Args& args) {
 };
 
 void Uno::nextTurn(Brobot* bro) {
+	turntimer.restart();
 	bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
 	if (discard.back().attr == none) {
 	} else if (has_to_draw_cards != 0) {

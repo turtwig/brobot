@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm> // for random_shuffle
+#include <boost/timer.hpp> // for turn timer
 #include "../include/BaseModule.h"
 #include "../include/Args.h"
 #include "../include/brobot.h"
@@ -23,9 +24,9 @@ class Uno : public BaseModule {
 	};
 	struct Player {
 		std::vector<Card> hand;
-		bool has_drawn;
+		bool has_drawn, has_challenged;
 		std::string nick;
-		Player(const std::string& n) : nick(n), has_drawn(false) {};
+		Player(const std::string& n) : nick(n), has_drawn(false), has_challenged(false) {};
 		bool operator==(const std::string& n) { return n == nick; };
 	};
 	// Cards
@@ -41,6 +42,7 @@ class Uno : public BaseModule {
 	std::string channel;
 	std::string uno_creator;
 	std::vector<Player>::iterator current_player;
+	boost::timer turntimer;
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
 	unsigned short int has_to_draw_cards; // number of cards to draw
 	void reversePlayers();
@@ -88,6 +90,7 @@ class Uno : public BaseModule {
 	void showHand(Brobot* bro, Args& args);
 	void playCard(Brobot* bro, Args& args);
 	void challenge(Brobot* bro, Args& args);
+	void skipTurn(Brobot* bro, Args& args);
 };
 
 #endif // UNO_H_INCLUDED
