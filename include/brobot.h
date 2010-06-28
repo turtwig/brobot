@@ -49,47 +49,47 @@
 class IRC; // Declaration for use of friend in Brobot
 
 class Brobot : private boost::noncopyable {
-    BaseSocket* sock; // is a pointer so we can use either a normal Socket or a SSLSocket (both inheriting from BaseSocket)
-    boost::asio::ssl::context& context; // Used for SSL (even if SSL is disabled)
-    boost::asio::io_service& io_service;
+	BaseSocket* sock; // is a pointer so we can use either a normal Socket or a SSLSocket (both inheriting from BaseSocket)
+	boost::asio::ssl::context& context; // Used for SSL (even if SSL is disabled)
+	boost::asio::io_service& io_service;
 
-    typedef std::map<std::string, boost::function<void (Args&)> > callback_map_t; // map holding various elements, each having a name and a function
-    std::map<std::string, callback_map_t> callbacks; // the actual map of callbacks. each element points to an ``event''. each element points to a callback_map_t
+	typedef std::map<std::string, boost::function<void (Args&)> > callback_map_t; // map holding various elements, each having a name and a function
+	std::map<std::string, callback_map_t> callbacks; // the actual map of callbacks. each element points to an ``event''. each element points to a callback_map_t
 
-    std::map<std::string, BaseModule*> modules; // map of modules (name, module*) is a pointer for polymorphism
+	std::map<std::string, BaseModule*> modules; // map of modules (name, module*) is a pointer for polymorphism
 
-    std::map<std::string, boost::function<void (const std::string&)> > parserEvents; // map of functions to call on each run of parse(), (name, function)
+	std::map<std::string, boost::function<void (const std::string&)> > parserEvents; // map of functions to call on each run of parse(), (name, function)
 
 	std::vector<std::pair<std::string, std::string> > hooks_to_unhook; // list of hooks to be unhooked on the next runHooks()
 	std::vector<std::string> parsers_to_delete; // list of parsers to delete on next parse();
 
-    public:
+	public:
 	Brobot(boost::asio::io_service& io, boost::asio::ssl::context& ctx, const std::string& fname = "brobot.conf");
-    ~Brobot();
+	~Brobot();
 
-    void start(); // main bot loop, connects and parses shit.
+	void start(); // main bot loop, connects and parses shit.
 
-    void hook(const std::string& name, const std::string& hook, boost::function<void (Args&)> func);
-    void unhook(const std::string& name, const std::string& hook);
-    void runHooks(const std::string& hook, Args& arg);
+	void hook(const std::string& name, const std::string& hook, boost::function<void (Args&)> func);
+	void unhook(const std::string& name, const std::string& hook);
+	void runHooks(const std::string& hook, Args& arg);
 
-    bool loadMod(const std::string& name, BaseModule* module);
-    bool unloadMod(const std::string& name);
-    BaseModule* findMod(const std::string& name); // returns NULL if module not found
+	bool loadMod(const std::string& name, BaseModule* module);
+	bool unloadMod(const std::string& name);
+	BaseModule* findMod(const std::string& name); // returns NULL if module not found
 	std::vector<std::string> listMods();
 
-    void addParser(const std::string& name, boost::function<void (const std::string&)> func);
-    void delParser(const std::string& name);
+	void addParser(const std::string& name, boost::function<void (const std::string&)> func);
+	void delParser(const std::string& name);
 
-    // public members
-    // The only reason they are public is for easy access to their own interfaces
-    Storage* stor; // config file (brobot.conf)
-    friend class IRC; // used for IRC control
-    IRC* irc;
+	// public members
+	// The only reason they are public is for easy access to their own interfaces
+	Storage* stor; // config file (brobot.conf)
+	friend class IRC; // used for IRC control
+	IRC* irc;
 
 
-    private:
-    void parse(const std::string& s); // the actual parser, runs every time something is received from the server.
+	private:
+	void parse(const std::string& s); // the actual parser, runs every time something is received from the server.
 };
 
 #include "../include/IRC.h" // member functions for easy IRC control, must be included after Brobot due to proper type qualifications

@@ -5,10 +5,10 @@ Uno::Card::Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const s
 		return;
 	std::fstream file;
 	file.open((bro->stor->get("module.uno.dir")+fname).c_str(), std::ios::in);
-    if (file) {
+	if (file) {
 		for (int i = 0; i < 14; ++i) {
-            std::getline(file, ascii[i]);
-        }
+			std::getline(file, ascii[i]);
+		}
 	}
 	file.close();
 };
