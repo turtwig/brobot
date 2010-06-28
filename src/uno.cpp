@@ -78,18 +78,23 @@ void Uno::help(Brobot* bro, Args& args) {
 	bro->irc->privmsg(args[4], ".endgame            ends a game");
 	bro->irc->privmsg(args[4], ".drop               drops you from the game");
 	bro->irc->privmsg(args[4], ".hand               shows your hand");
+	bro->irc->privmsg(args[4], ".ha                 alias for .hand");
 	bro->irc->privmsg(args[4], ".discard            shows current discard");
+	bro->irc->privmsg(args[4], ".dc                 alias for .discard");
 	bro->irc->privmsg(args[4], ".players            shows playing order, current player and number of cards of each player");
 	bro->irc->privmsg(args[4], ".challenge          challenges a player after he played a wild +4");
 	bro->irc->privmsg(args[4], ".draw               draws a card");
+	bro->irc->privmsg(args[4], ".dr                 alias for .draw");
 	bro->irc->privmsg(args[4], ".pass               passes turn");
-	bro->irc->privmsg(args[4], ".pl                 plays a card");
+	bro->irc->privmsg(args[4], ".pa                 alias for .pass");
+	bro->irc->privmsg(args[4], ".play               plays a card");
+	bro->irc->privmsg(args[4], ".pl                 alias for .play");
 	bro->irc->privmsg(args[4], ".skip               makes the current player draw a card and pass his turn");
 	bro->irc->privmsg(args[4], "                    this command only works if a minute has passed since the player's turn started");
 	bro->irc->privmsg(args[4], " ");
-	bro->irc->privmsg(args[4], "Syntax for pl is: [rgby][0-9] (i.e. r1, b5, g6)");
-	bro->irc->privmsg(args[4], "                  Special cards: r+2, rs, rr");
-	bro->irc->privmsg(args[4], "                  Wild and Wild+4s: w [rgby], w+4 [rgby] to specify a color");
+	bro->irc->privmsg(args[4], "Syntax for .play is: .play [rgby][0-9] (i.e. r1, b5, g6)");
+	bro->irc->privmsg(args[4], "                           Special cards: r+2, rs, rr");
+	bro->irc->privmsg(args[4], "                           Wild and Wild+4s: w [rgby], w+4 [rgby] to specify a color");
 	bro->irc->privmsg(args[4], "You cannot join a game in progress.");
 	bro->irc->privmsg(args[4], "If you drop from a game you cannot re-join it.");
 };
@@ -105,30 +110,34 @@ void Uno::gameEnd(Brobot* bro, Args& args) {
 };
 
 void Uno::playCard(Brobot* bro, Args& args) {
-	if (started != 2 || args[5].size() < 6 || args[5].substr(0,4) != ".pl " || args[4] != channel)
+	if (started != 2 || args[5].size() < 6 || args[5].substr(0,3) != ".pl" || args[4] != channel)
 		return;
 	if (args[1] != current_player->nick) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
 	}
+	unsigned short int h = 0;
+	if (args[5].substr(0,6) == ".play ") {
+		h = 2;
+	}
 	Cardtype color;
 	short int number;
-	switch(args[5][4]) {
+	switch(args[5][4+h]) {
 		case 'r':
 			color = red;
-			number = atoi(&(args[5][5]));
+			number = atoi(&(args[5][5+h]));
 			break;
 		case 'b':
 			color = blue;
-			number = atoi(&(args[5][5]));
+			number = atoi(&(args[5][5+h]));
 			break;
 		case 'g':
 			color = green;
-			number = atoi(&(args[5][5]));
+			number = atoi(&(args[5][5+h]));
 			break;
 		case 'y':
 			color = yellow;
-			number = atoi(&(args[5][5]));
+			number = atoi(&(args[5][5+h]));
 			break;
 		case 'w':
 			color = none_;
@@ -138,8 +147,8 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			bro->irc->privmsg(channel, "What card was that again?");
 			return;
 	}
-	if (args[5][5] == 'r' || args[5][5] == 's' || args[5][5] == '+' || number == -1) {
-		if (has_to_draw_cards == 0 && args[5][5] == 'r' && (discard.back().type == color || discard.back().attr == reverse)) {
+	if (args[5][5+h] == 'r' || args[5][5+h] == 's' || args[5][5+h] == '+' || number == -1) {
+		if (has_to_draw_cards == 0 && args[5][5+h] == 'r' && (discard.back().type == color || discard.back().attr == reverse)) {
 			Card c(NULL, -1, color, reverse, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
@@ -169,7 +178,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 				nextPlayer();
 				nextTurn(bro);
 			}
-		} else if (has_to_draw_cards == 0 && args[5][5] == 's' && (discard.back().type == color || discard.back().attr == skip)) {
+		} else if (has_to_draw_cards == 0 && args[5][5+h] == 's' && (discard.back().type == color || discard.back().attr == skip)) {
 			Card c(NULL, -1, color, skip, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
@@ -193,7 +202,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
 			nextPlayer();
 			nextTurn(bro);
-		} else if (args[5][4] != 'w' && args[5].substr(5,2) == "+2" && (discard.back().type == color || discard.back().attr == drawtwo || (discard.back().attr == drawfour && discard.back().type == color))) {
+		} else if (args[5][4+h] != 'w' && args[5].substr(5+h,2) == "+2" && (discard.back().type == color || discard.back().attr == drawtwo || (discard.back().attr == drawfour && discard.back().type == color))) {
 			Card c(NULL, -1, color, drawtwo, "");
 			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
 			if (it == current_player->hand.end()) {
@@ -215,12 +224,12 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			}
 			nextPlayer();
 			nextTurn(bro);
-		} else if (args[5][4] == 'w' && args[5][5] != '+' && has_to_draw_cards == 0) {
+		} else if (args[5][4+h] == 'w' && args[5][5+h] != '+' && has_to_draw_cards == 0) {
 			char ch;
-			if (args[5][5] == ' ') {
-				ch = args[5][6];
+			if (args[5][5+h] == ' ') {
+				ch = args[5][6+h];
 			} else {
-				ch = args[5][5];
+				ch = args[5][5+h];
 			}
 			Cardtype newcol;
 			switch (ch) {
@@ -262,12 +271,12 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			}
 			nextPlayer();
 			nextTurn(bro);
-		} else if (args[5].substr(4,3) == "w+4" && args[5].size() >= 8) {
+		} else if (args[5].substr(4+h,3) == "w+4" && args[5].size() >= 8) {
 			char ch;
-			if (args[5][7] == ' ') {
-				ch = args[5][8];
+			if (args[5][7+h] == ' ') {
+				ch = args[5][8+h];
 			} else {
-				ch = args[5][7];
+				ch = args[5][7+h];
 			}
 			Cardtype newcol;
 			switch (ch) {
@@ -749,7 +758,7 @@ void Uno::reversePlayers() {
 };
 
 void Uno::drawCard(Brobot* bro, Args& args) {
-	if (started != 2 || args[5] != ".draw" || args[4] != channel)
+	if (started != 2 || (args[5] != ".draw" && args[5] != ".dr") || args[4] != channel)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -790,7 +799,7 @@ void Uno::drawCard(Brobot* bro, Args& args) {
 };
 
 void Uno::passTurn(Brobot* bro, Args& args) {
-	if (started != 2 || args[5] != ".pass" || args[4] != channel)
+	if (started != 2 || (args[5] != ".pass" && args[5] != ".pa") || args[4] != channel)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -813,7 +822,7 @@ void Uno::passTurn(Brobot* bro, Args& args) {
 };
 
 void Uno::showHand(Brobot* bro, Args& args) {
-	if (started == 0 || args[5] != ".hand" || args[4] != channel)
+	if (started == 0 || (args[5] != ".hand" && args[5] != ".ha") || args[4] != channel)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -910,7 +919,7 @@ void Uno::listPlayers(Brobot* bro, Args& args) {
 };
 
 void Uno::showDiscard(Brobot* bro, Args& args) {
-	if (started != 2 || args[5] != ".discard" || args[4] != channel)
+	if (started != 2 || (args[5] != ".discard" && args[5] != ".dc") || args[4] != channel)
 		return;
 	bro->irc->privmsg(args[4], "Current discard:");
 	printCard(bro, channel, false, discard.back());
