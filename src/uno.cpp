@@ -672,6 +672,7 @@ void Uno::startGame(Brobot* bro, Args& args) {
 		return;
 	}
 	bro->irc->privmsg(channel, "Starting 4U8N3O12! game in "+channel+"!");
+	turntimer.restart();
 	current_player = players.begin();
 	std::string pstring;
 	BOOST_FOREACH( Player p, players)
