@@ -95,7 +95,6 @@ void Uno::help(Brobot* bro, Args& args) {
 	bro->irc->privmsg(args[4], "Syntax for .play is: .play [rgby][0-9] (i.e. r1, b5, g6)");
 	bro->irc->privmsg(args[4], "                           Special cards: r+2, rs, rr");
 	bro->irc->privmsg(args[4], "                           Wild and Wild+4s: w [rgby], w+4 [rgby] to specify a color");
-	bro->irc->privmsg(args[4], "You cannot join a game in progress.");
 	bro->irc->privmsg(args[4], "If you drop from a game you cannot re-join it.");
 };
 
@@ -110,7 +109,7 @@ void Uno::gameEnd(Brobot* bro, Args& args) {
 };
 
 void Uno::playCard(Brobot* bro, Args& args) {
-	if (started != 2 || args[5].size() < 6 || args[5].substr(0,3) != ".pl" || args[4] != channel)
+	if (started != 2 || args[5].size() < 6 || (args[5].substr(0,3) != ".pl" || args[5] == ".players") || args[4] != channel)
 		return;
 	if (args[1] != current_player->nick) {
 		bro->irc->privmsg(channel, "It's not your turn!");
@@ -864,10 +863,6 @@ void Uno::nextTurn(Brobot* bro) {
 void Uno::joinHook(Brobot* bro, Args& args) {
 	if (started == 0 || args[5] != ".join" || args[4] != channel)
 		return;
-	if (started == 2) {
-		bro->irc->privmsg(args[4], "Game in "+args[4]+" already in progress!");
-		return;
-	}
 	std::vector<std::string>::iterator dropit = std::find(dropped_players.begin(), dropped_players.end(), args[1]);
 	if (dropit != dropped_players.end()) {
 		bro->irc->privmsg(args[4], "You have already dropped from the game!");
