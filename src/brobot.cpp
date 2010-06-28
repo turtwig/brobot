@@ -96,6 +96,18 @@ std::vector<std::string> Brobot::listMods() {
 	return vec;
 };
 
+std::map<std::string, std::vector<std::string> > Brobot::listHooks() {
+	std::map<std::string, std::vector<std::string> > map;
+	typedef std::pair<std::string, callback_map_t> pair_t;
+	typedef std::pair<std::string, boost::function<void (Args&)> > penis_t;
+	BOOST_FOREACH(pair_t pair1, callbacks) {
+		BOOST_FOREACH(penis_t pair2, pair1.second) {
+			map[pair1.first].push_back(pair2.first);
+		}
+	}
+	return map;
+};
+
 void Brobot::parse(const std::string& s) {
 	BOOST_FOREACH( std::string name, parsers_to_delete) {
 		std::map<std::string, boost::function<void (const std::string&)> >::iterator it = parserEvents.find(name);

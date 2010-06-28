@@ -72,6 +72,7 @@ class Brobot : private boost::noncopyable {
 	void hook(const std::string& name, const std::string& hook, boost::function<void (Args&)> func);
 	void unhook(const std::string& name, const std::string& hook);
 	void runHooks(const std::string& hook, Args& arg);
+	std::map<std::string, std::vector<std::string> > listHooks();
 
 	bool loadMod(const std::string& name, BaseModule* module);
 	bool unloadMod(const std::string& name);

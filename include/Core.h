@@ -28,6 +28,7 @@ class CoreModule : public BaseModule {
 	void onconnect(Brobot* bro, Args& arg);
 	void pingHook(Brobot* bro, Args& arg);
 	void modulelist(Brobot* bro, Args& args);
+	void hooklist(Brobot* bro, Args& args);
 	void moduleunload(Brobot* bro, Args& args);
 	void moduleload(Brobot* bro, Args& args);
 };

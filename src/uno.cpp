@@ -708,8 +708,10 @@ void Uno::startGame(Brobot* bro, Args& args) {
 				discard.back().type = yellow;
 				break;
 		}
-		if (discard.back().attr == drawfour)
+		if (discard.back().attr == drawfour) {
 			has_to_draw_cards += 4;
+			current_player->has_challenged = true; // don't let the player challenge on first turn
+		}
 		nextTurn(bro);
 	} else if (discard.back().attr == skip) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");

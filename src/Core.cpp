@@ -12,6 +12,7 @@ void CoreModule::onLoad(Brobot* bro) {
 	bro->hook("[core] Ping", "OnPING", boost::bind(&CoreModule::pingHook, this, bro, _1));
 	bro->hook("[core] OnConnect", "Numeric001", boost::bind(&CoreModule::onconnect, this, bro, _1));
 	bro->hook("[core] ModuleList", "OnPRIVMSG", boost::bind(&CoreModule::modulelist, this, bro, _1));
+	bro->hook("[core] HookList", "OnPRIVMSG", boost::bind(&CoreModule::hooklist, this, bro, _1));
 	bro->hook("[core] ModuleUnload", "OnPRIVMSG", boost::bind(&CoreModule::moduleunload, this, bro, _1));
 	bro->hook("[core] ModuleLoad", "OnPRIVMSG", boost::bind(&CoreModule::moduleload, this, bro, _1));
 };
@@ -27,6 +28,7 @@ void CoreModule::onUnload(Brobot* bro) {
 	// Hooks
 	bro->unhook("[core] Ping", "OnPING");
 	bro->unhook("[core] ModuleList", "OnPRIVMSG");
+	bro->unhook("[core] HookList", "OnPRIVMSG");
 	bro->unhook("[core] ModuleUnload", "OnPRIVMSG");
 	bro->unhook("[core] ModuleLoad", "OnPRIVMSG");
 };
@@ -156,8 +158,25 @@ void CoreModule::modulelist(Brobot* bro, Args& args) {
 		target = args[1];
 	}
 	bro->irc->privmsg(target, "Modules loaded:");
-	BOOST_FOREACH(std::string mod, bro->listMods()) {
+	BOOST_FOREACH(std::string mod, bro->listMods())
 		bro->irc->privmsg(target, " * "+mod);
+};
+
+void CoreModule::hooklist(Brobot* bro, Args& args) {
+	if (args[5] != ".hooklist" || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
+		return;
+	std::string target;
+	if (args[4][0] == '#') {
+		target = args[4];
+	} else {
+		target = args[1];
+	}
+	bro->irc->privmsg(target, "Active hooks:");
+	typedef std::pair<std::string, std::vector<std::string> > pair_t;
+	BOOST_FOREACH(pair_t pair, bro->listHooks()) {
+		BOOST_FOREACH(std::string name, pair.second) {
+			bro->irc->privmsg(target, " * "+pair.first+" "+name);
+		}
 	}
 };
 
