@@ -883,8 +883,9 @@ void Uno::joinHook(Brobot* bro, Args& args) {
 		p.hand.push_back(deck.back());
 		deck.pop_back();
 	}
+	std::string current_nick = current_player->nick;
 	players.push_back(p);
-	current_player = players.begin();
+	current_player = std::find(players.begin(), players.end(), current_nick);
 	bro->irc->privmsg(args[4], ""+args[1]+" has joined this game of 4U8N3O12!");
 	bro->irc->notice(args[1], "Your cards are:");
 	printCard(bro, args[1], true, p.hand);
