@@ -350,7 +350,10 @@ void Uno::playCard(Brobot* bro, Args& args) {
 void Uno::challenge(Brobot* bro, Args& args) {
 	if (started != 2 || args[5] != ".challenge" || args[4] != channel)
 		return;
-	if (args[1] != current_player->nick) {
+	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
+	if (it == players.end())
+		return;
+	if (it != current_player) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
 	}
@@ -359,14 +362,13 @@ void Uno::challenge(Brobot* bro, Args& args) {
 		return;
 	}
 	current_player->has_challenged = true;
-	std::vector<Player>::iterator previous_player = current_player;
-	if (previous_player == players.begin()) {
-		previous_player = --players.end();
+	if (it == players.begin()) {
+		it = --players.end();
 	} else {
-		--previous_player;
+		--it;
 	}
 	bool invalid = false;
-	BOOST_FOREACH(Card c, previous_player->hand) {
+	BOOST_FOREACH(Card c, it->hand) {
 		if (c.type == (discard.end()-2)->type) {
 			invalid = true;
 			break;
@@ -376,14 +378,14 @@ void Uno::challenge(Brobot* bro, Args& args) {
 		has_to_draw_cards += 2;
 		char tmpbuf[10];
 		_itoa(has_to_draw_cards, tmpbuf, 10);
-		bro->irc->privmsg(channel, ""+previous_player->nick+"'s move was legal and "+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
+		bro->irc->privmsg(channel, ""+it->nick+"'s move was legal and "+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
 		return;
 	} else {
 		char tmpbuf[10];
 		_itoa(has_to_draw_cards, tmpbuf, 10);
-		bro->irc->privmsg(channel, ""+previous_player->nick+"'s move was illegal and has to draw "+std::string(tmpbuf)+" cards!");
+		bro->irc->privmsg(channel, ""+it->nick+"'s move was illegal and has to draw "+std::string(tmpbuf)+" cards!");
 		current_player->has_challenged = false; // challenge was successful
-		current_player = previous_player;
+		current_player = it;
 		current_player->has_challenged = true; // the previous player can't challenge himself
 		nextTurn(bro);
 	}
@@ -613,6 +615,9 @@ void Uno::endGame(Brobot* bro) {
 
 void Uno::skipTurn(Brobot* bro, Args& args) {
 	if (started != 2 || args[4] != channel || args[5] != ".skip")
+		return;
+	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
+	if (it == players.end())
 		return;
 	if (turntimer.elapsed() < 60) {
 		char tmpbuf[10];
@@ -924,6 +929,9 @@ void Uno::listPlayers(Brobot* bro, Args& args) {
 
 void Uno::showDiscard(Brobot* bro, Args& args) {
 	if (started != 2 || (args[5] != ".discard" && args[5] != ".dc") || args[4] != channel)
+		return;
+	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
+	if (it == players.end())
 		return;
 	bro->irc->privmsg(args[4], "Current discard:");
 	printCard(bro, channel, false, discard.back());
