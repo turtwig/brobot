@@ -12,7 +12,7 @@ class Storage : private boost::noncopyable {
 	public:
 	Storage(const std::string& fname);
 	const char* getcstr(const std::string& key) { if (keys.find(key) != keys.end()) { return keys.find(key)->second.c_str(); } else { return ""; } };
-	const std::string& get(const std::string& key) { if (keys.find(key) != keys.end()) { return keys.find(key)->second; } else { return ""; } };
+	const std::string get(const std::string& key) { if (keys.find(key) != keys.end()) { return keys.find(key)->second; } else { return ""; } };
 };
 
 #endif // STORAGE_H_INCLUDED

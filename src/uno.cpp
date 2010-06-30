@@ -788,7 +788,6 @@ void Uno::drawCard(Brobot* bro, Args& args) {
 		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
 		has_to_draw_cards = 0;
 		bro->irc->privmsg(channel, ""+args[1]+" loses his turn!");
-		it->has_drawn = false;
 		it->has_challenged = false;
 		nextPlayer();
 		bro->irc->privmsg(args[4], "Current discard:");
@@ -802,8 +801,8 @@ void Uno::drawCard(Brobot* bro, Args& args) {
 		deck.pop_back();
 		if (deck.empty())
 			swapDecks();
+		it->has_drawn = true;
 	}
-	it->has_drawn = true;
 };
 
 void Uno::passTurn(Brobot* bro, Args& args) {
