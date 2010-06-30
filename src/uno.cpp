@@ -787,6 +787,13 @@ void Uno::drawCard(Brobot* bro, Args& args) {
 		printCard(bro, args[1], true, drawncards);
 		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
 		has_to_draw_cards = 0;
+		bro->irc->privmsg(channel, ""+args[1]+" passes his turn!");
+		it->has_drawn = false;
+		it->has_challenged = false;
+		nextPlayer();
+		bro->irc->privmsg(args[4], "Current discard:");
+		printCard(bro, channel, false, discard.back());
+		nextTurn(bro);
 	} else {
 		it->hand.push_back(deck.back());
 		bro->irc->privmsg(channel, ""+args[1]+" draws a card!");
