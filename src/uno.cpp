@@ -56,15 +56,87 @@ void Uno::printCard(Brobot* bro, const std::string& target, bool notice, std::ve
 	}
 };
 
+Uno::Uno(Brobot* bro) : started(0), has_to_draw_cards(0),
+						_0red(bro, 0, red, none, "0red.txt"), _1red(bro, 1, red, none, "1red.txt"), _2red(bro, 2, red, none, "2red.txt"), _3red(bro, 3, red, none, "3red.txt"),
+						_4red(bro, 4, red, none, "4red.txt"), _5red(bro, 5, red, none, "5red.txt"), _6red(bro, 6, red, none, "6red.txt"), _7red(bro, 7, red, none, "7red.txt"),
+						_8red(bro, 8, red, none, "8red.txt"), _9red(bro, 9, red, none, "9red.txt"), _p2red(bro, -1, red, drawtwo, "+2red.txt"), _skipred(bro, -1, red, skip, "skipred.txt"),
+						_reversered(bro, -1, red, reverse, "reversered.txt"),
+						_0blue(bro, 0, blue, none, "0blue.txt"), _1blue(bro, 1, blue, none, "1blue.txt"), _2blue(bro, 2, blue, none, "2blue.txt"), _3blue(bro, 3, blue, none, "3blue.txt"),
+						_4blue(bro, 4, blue, none, "4blue.txt"), _5blue(bro, 5, blue, none, "5blue.txt"), _6blue(bro, 6, blue, none, "6blue.txt"), _7blue(bro, 7, blue, none, "7blue.txt"),
+						_8blue(bro, 8, blue, none, "8blue.txt"), _9blue(bro, 9, blue, none, "9blue.txt"), _p2blue(bro, -1, blue, drawtwo, "+2blue.txt"), _skipblue(bro, -1, blue, skip, "skipblue.txt"),
+						_reverseblue(bro, -1, blue, reverse, "reverseblue.txt"),
+						_0green(bro, 0, green, none, "0green.txt"), _1green(bro, 1, green, none, "1green.txt"), _2green(bro, 2, green, none, "2green.txt"), _3green(bro, 3, green, none, "3green.txt"),
+						_4green(bro, 4, green, none, "4green.txt"), _5green(bro, 5, green, none, "5green.txt"), _6green(bro, 6, green, none, "6green.txt"), _7green(bro, 7, green, none, "7green.txt"),
+						_8green(bro, 8, green, none, "8green.txt"), _9green(bro, 9, green, none, "9green.txt"), _p2green(bro, -1, green, drawtwo, "+2green.txt"), _skipgreen(bro, -1, green, skip, "skipgreen.txt"),
+						_reversegreen(bro, -1, green, reverse, "reversegreen.txt"),
+						_0yellow(bro, 0, yellow, none, "0yellow.txt"), _1yellow(bro, 1, yellow, none, "1yellow.txt"), _2yellow(bro, 2, yellow, none, "2yellow.txt"), _3yellow(bro, 3, yellow, none, "3yellow.txt"),
+						_4yellow(bro, 4, yellow, none, "4yellow.txt"), _5yellow(bro, 5, yellow, none, "5yellow.txt"), _6yellow(bro, 6, yellow, none, "6yellow.txt"), _7yellow(bro, 7, yellow, none, "7yellow.txt"),
+						_8yellow(bro, 8, yellow, none, "8yellow.txt"), _9yellow(bro, 9, yellow, none, "9yellow.txt"), _p2yellow(bro, -1, yellow, drawtwo, "+2yellow.txt"), _skipyellow(bro, -1, yellow, skip, "skipyellow.txt"),
+						_reverseyellow(bro, -1, yellow, reverse, "reverseyellow.txt"),
+						_wild(bro, -1, red, wild, "wild.txt"), _p4wild(bro, -1, red, drawfour, "wild+4.txt") {
+	std::string scorefile = bro->stor->get("module.uno.scorefile");
+	if (scorefile == "")
+		return;
+	std::fstream file;
+	file.open(scorefile.c_str(), std::ios::in);
+	if (file) {
+		while (!file.eof()) {
+			std::string line;
+			std::getline(file, line);
+			if (line[0] != '#') continue;
+			size_t space = line.find_first_of(" ");
+			std::string channel = line.substr(0, space);
+			line.erase(0, space);
+			std::vector<std::string> tokens;
+			std::istringstream iss(line);
+			std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), std::back_inserter<std::vector<std::string> >(tokens));
+			for (unsigned short int i = 0; i < tokens.size(); i += 3) {  // i+0 -> nick, i+1-> win number, i+2-> total score
+				scores[channel][tokens[i]].first = atoi(tokens[i+1].c_str());
+				scores[channel][tokens[i]].second = atoi(tokens[i+2].c_str());
+			}
+		}
+		typedef std::pair<std::string, std::map<std::string, std::pair<unsigned long int, unsigned long int> > > pair_1;
+		typedef std::pair<std::string, std::pair<unsigned long int, unsigned long int> > pair_2;
+		BOOST_FOREACH(pair_1 pair1, scores) {
+			BOOST_FOREACH(pair_2 pair2, pair1.second) {
+				global_scores[pair2.first].first += pair2.second.first;
+				global_scores[pair2.first].second += pair2.second.second;
+			}
+		}
+	}
+	file.close();
+};
+
+void Uno::showScores(Brobot* bro, Args& args) {
+	if (args[5] != ".uno score" || args[4][0] != '#')
+		return;
+	bro->irc->privmsg(args[4], "4U8N3O12! scores for "+args[4]+":");
+	typedef std::pair<std::string, std::map<std::string, std::pair<unsigned long int, unsigned long int> > > pair_1;
+	typedef std::pair<std::string, std::pair<unsigned long int, unsigned long int> > pair_2;
+	BOOST_FOREACH(pair_1 pair1, scores) {
+		if (pair1.first != args[4])
+			continue;
+		BOOST_FOREACH(pair_2 pair2, pair1.second) {
+			char wincount[20];
+			_itoa(pair2.second.first, wincount, 10);
+			char totalscore[20];
+			_itoa(pair2.second.second, totalscore, 10);
+			bro->irc->privmsg(args[4], " * "+pair2.first+" with "+std::string(wincount)+" wins and "+std::string(totalscore)+" points!");
+		}
+	}
+};
+
 void Uno::onLoad(Brobot* bro) {
 	bro->hook("[uno] gameStart", "OnPRIVMSG", boost::bind(&Uno::gameStart, this, bro, _1));
 	bro->hook("[uno] help", "OnPRIVMSG", boost::bind(&Uno::help, this, bro, _1));
+	bro->hook("[uno] showScores", "OnPRIVMSG", boost::bind(&Uno::showScores, this, bro, _1));
 };
 
 void Uno::onUnload(Brobot* bro) {
 	endGame(bro); // make sure the game ends properly (if any)
 	bro->unhook("[uno] gameStart", "OnPRIVMSG");
 	bro->unhook("[uno] help", "OnPRIVMSG");
+	bro->unhook("[uno] showScores", "OnPRIVMSG");
 };
 
 void Uno::help(Brobot* bro, Args& args) {
@@ -72,6 +144,7 @@ void Uno::help(Brobot* bro, Args& args) {
 		return;
 	bro->irc->privmsg(args[4], "           4U8N3O12! HELP");
 	bro->irc->privmsg(args[4], ".uno help           this help");
+	bro->irc->privmsg(args[4], ".uno score         display score totals");
 	bro->irc->privmsg(args[4], ".uno                creates a game");
 	bro->irc->privmsg(args[4], ".join               joins the game");
 	bro->irc->privmsg(args[4], ".start              starts a created game");
