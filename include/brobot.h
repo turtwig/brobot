@@ -13,7 +13,6 @@
 #include <vector> // Used for hooks
 
 #include <string>
-#include <cstring> // Used for strcmp
 
 #include <boost/bind.hpp> // Used in callbacks
 #include <boost/function.hpp> // Used in callbacks

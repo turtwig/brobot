@@ -169,7 +169,7 @@ void Uno::updateScore(Brobot* bro, const std::string& nick, unsigned int score) 
 	}
 	std::sort(scores.begin(), scores.end());
 	std::ofstream file;
-	file.open(bro->stor->get("module.uno.scorefile").c_str(), std::ios::out);
+	file.open(bro->stor->getcstr("module.uno.scorefile"), std::ios::out);
 	if (!file) {
 		return; // OH WELL
 	}

@@ -3,7 +3,7 @@
 Brobot::Brobot(boost::asio::io_service& io, boost::asio::ssl::context& ctx, const std::string& fname) : context(ctx), io_service(io) {
 	stor = new Storage(fname);
 	irc = new IRC(this);
-	if (std::strcmp(stor->getcstr("core.ssl"),"1") == 0) {
+	if (stor->get("core.ssl") == "1") {
 		sock = new SSLSocket(stor->getcstr("core.ip"), stor->getcstr("core.port"), io_service, context);
 	} else {
 		sock = new Socket(stor->getcstr("core.ip"), stor->getcstr("core.port"), io_service);

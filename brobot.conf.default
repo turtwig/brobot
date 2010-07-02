@@ -1,30 +1,28 @@
-// Network shit
+// ip can be a domain
 core.ip irc.somewhere.net
 core.port 6697
-// SSL
+// SSL (1 or 0)
 core.ssl 1
-// Nick shit
+// self-explanatory
 core.nick fagbot
 core.real fag
 core.ident bot
-// Oper shit
-core.oper 0
+// don't define if you don't want it to oper up
 core.oper.login oper
 core.oper.password scum
-// NickServ shit
-core.nickserv 0
-core.nickserv.password fag
+// same thing as above
+core.nickserv fag
 // commands to do after connecting
-// counting starts at 0
+// counting starts at 0 goes up to however much you need
 core.onconnect.0 JOIN #faggots
 core.onconnect.1 PART #faggots :emopart
 // owner stuff
 // set those to your own
-// only the person matching all three can do bot operations
+// only the person matching all three can do bot operations (.modlist/.hooklist/.modload/.modunload)
 core.owner.nick homo
 core.owner.ident fag
 core.owner.host sucksdicks.com
-// Ascii shit
+// ascii directory
 module.ascii.dir C:\some\ascii\path\
 // or
 //module.ascii.dir /some/ascii/

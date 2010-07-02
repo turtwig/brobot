@@ -126,11 +126,11 @@ void CoreModule::pingHook(Brobot* bro, Args& arg) {
 
 // Runs the raw commands in brobot.conf starting from core.onconnnect.0 up to however much needed
 void CoreModule::onconnect(Brobot* bro, Args& arg) {
-	if (std::strcmp(bro->stor->getcstr("core.oper"),"1") == 0) { // we can oper up
+	if (bro->stor->get("core.oper.login") != "" && bro->stor->get("core.oper.password") != "") { // we can oper up
 		bro->irc->oper(bro->stor->get("core.oper.login"), bro->stor->get("core.oper.password"));
 	}
-	if (std::strcmp(bro->stor->getcstr("core.nickserv"),"1") == 0) { // we need to identify
-		bro->irc->privmsg("NickServ", "IDENTIFY " + bro->stor->get("core.nickserv.password"));
+	if (bro->stor->get("core.nickserv") != "") { // we need to identify
+		bro->irc->privmsg("NickServ", "IDENTIFY " + bro->stor->get("core.nickserv"));
 	}
 	unsigned short int h = 0;
 	std::string str = "";
