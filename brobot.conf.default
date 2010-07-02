@@ -9,11 +9,11 @@ core.real fag
 core.ident bot
 // Oper shit
 core.oper 0
-core.operlogin oper
-core.operpass scum
+core.oper.login oper
+core.oper.password scum
 // NickServ shit
 core.nickserv 0
-core.nickpass fag
+core.nickserv.password fag
 // commands to do after connecting
 // counting starts at 0
 core.onconnect.0 JOIN #faggots
@@ -32,3 +32,5 @@ module.ascii.dir C:\some\ascii\path\
 module.uno.dir C:\some\path\leading\to\uno\asciis\
 // or
 //module.uno.dir /some/path/
+module.uno.scorefile ../brobot.uno
+// or anywhere else

@@ -7,7 +7,6 @@
 #include <algorithm> // for random_shuffle
 #include <iterator>
 #include <sstream>
-#include <iostream>
 #include <boost/timer.hpp> // for turn timer
 #include "../include/BaseModule.h"
 #include "../include/Args.h"
@@ -32,6 +31,15 @@ class Uno : public BaseModule {
 		Player(const std::string& n) : nick(n), has_drawn(false), has_challenged(false) {};
 		bool operator==(const std::string& n) { return n == nick; };
 	};
+	struct Score {
+		std::string nick;
+		std::string channel;
+		unsigned int total_score;
+		unsigned int win_count;
+		Score(const std::string& n, const std::string& ch, unsigned int sc, unsigned int wn) : nick(n), channel(ch), total_score(sc), win_count(wn) {};
+		bool operator<(const Score& score) { if (score.total_score == total_score) { return score.win_count < win_count; } else { return score.total_score < total_score; } };
+		bool operator==(const Score& score) { return nick == score.nick; };
+	};
 	// Cards
 	const Card _0red, _1red, _2red, _3red, _4red, _5red, _6red, _7red, _8red, _9red, _p2red, _skipred, _reversered,
 		_0blue, _1blue, _2blue, _3blue, _4blue, _5blue, _6blue, _7blue, _8blue, _9blue, _p2blue, _skipblue, _reverseblue,
@@ -45,10 +53,9 @@ class Uno : public BaseModule {
 	std::string channel;
 	std::string uno_creator;
 	std::vector<Player>::iterator current_player;
-	std::map<std::string, std::map<std::string, std::pair<unsigned long int, unsigned long int> > > scores; // per channel scores
-	std::map<std::string, std::pair<unsigned long int, unsigned long int> > global_scores; // global scores
+	std::vector<Score> scores;
 	boost::timer turntimer;
-	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running, no one can join
+	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running
 	unsigned short int has_to_draw_cards; // number of cards to draw
 	void reversePlayers();
 	void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
@@ -56,7 +63,8 @@ class Uno : public BaseModule {
 	void printCard(Brobot* bro, const std::string& target, bool notice, const Card& card);
 	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
 	void nextTurn(Brobot* bro);
-	void endGame(Brobot* bro);
+	void endGame(Brobot* bro, bool updatescore);
+	void updateScore(Brobot* bro, const std::string& nick, unsigned int score);
 	public:
 	Uno(Brobot* bro);
 	void onLoad(Brobot* bro);

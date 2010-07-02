@@ -3,7 +3,7 @@
 Uno::Card::Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname) : number(num), type(col), attr(spec) {
 	if (fname == "")
 		return;
-	std::fstream file;
+	std::ifstream file;
 	file.open((bro->stor->get("module.uno.dir")+fname).c_str(), std::ios::in);
 	if (file) {
 		for (int i = 0; i < 14; ++i) {
@@ -77,7 +77,7 @@ Uno::Uno(Brobot* bro) : started(0), has_to_draw_cards(0),
 	std::string scorefile = bro->stor->get("module.uno.scorefile");
 	if (scorefile == "")
 		return;
-	std::fstream file;
+	std::ifstream file;
 	file.open(scorefile.c_str(), std::ios::in);
 	if (file) {
 		while (!file.eof()) {
@@ -85,45 +85,88 @@ Uno::Uno(Brobot* bro) : started(0), has_to_draw_cards(0),
 			std::getline(file, line);
 			if (line[0] != '#') continue;
 			size_t space = line.find_first_of(" ");
-			std::string channel = line.substr(0, space);
+			std::string ch = line.substr(0, space);
 			line.erase(0, space);
 			std::vector<std::string> tokens;
 			std::istringstream iss(line);
 			std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), std::back_inserter<std::vector<std::string> >(tokens));
 			for (unsigned short int i = 0; i < tokens.size(); i += 3) {  // i+0 -> nick, i+1-> win number, i+2-> total score
-				scores[channel][tokens[i]].first = atoi(tokens[i+1].c_str());
-				scores[channel][tokens[i]].second = atoi(tokens[i+2].c_str());
+				scores.push_back(Score(tokens[i], ch, atoi(tokens[i+2].c_str()), atoi(tokens[i+1].c_str())));
 			}
 		}
-		typedef std::pair<std::string, std::map<std::string, std::pair<unsigned long int, unsigned long int> > > pair_1;
-		typedef std::pair<std::string, std::pair<unsigned long int, unsigned long int> > pair_2;
-		BOOST_FOREACH(pair_1 pair1, scores) {
-			BOOST_FOREACH(pair_2 pair2, pair1.second) {
-				global_scores[pair2.first].first += pair2.second.first;
-				global_scores[pair2.first].second += pair2.second.second;
-			}
-		}
+		std::sort(scores.begin(), scores.end());
 	}
 	file.close();
 };
 
 void Uno::showScores(Brobot* bro, Args& args) {
-	if (args[5] != ".uno score" || args[4][0] != '#')
+	if (args[5] != ".uno leaderboard" || args[4][0] != '#')
 		return;
-	bro->irc->privmsg(args[4], "4U8N3O12! scores for "+args[4]+":");
-	typedef std::pair<std::string, std::map<std::string, std::pair<unsigned long int, unsigned long int> > > pair_1;
-	typedef std::pair<std::string, std::pair<unsigned long int, unsigned long int> > pair_2;
-	BOOST_FOREACH(pair_1 pair1, scores) {
-		if (pair1.first != args[4])
-			continue;
-		BOOST_FOREACH(pair_2 pair2, pair1.second) {
-			char wincount[20];
-			_itoa(pair2.second.first, wincount, 10);
-			char totalscore[20];
-			_itoa(pair2.second.second, totalscore, 10);
-			bro->irc->privmsg(args[4], " * "+pair2.first+" with "+std::string(wincount)+" wins and "+std::string(totalscore)+" points!");
+	bro->irc->privmsg(args[4], "4U8N3O12! leaderboard for "+args[4]+":");
+	unsigned short int counter = 1;
+	BOOST_FOREACH(Score score, scores) {
+		if (score.channel != args[4]) continue;
+		char wincount[20];
+		_itoa(score.win_count, wincount, 10);
+		char totalscore[20];
+		_itoa(score.total_score, totalscore, 10);
+		char position[10];
+		_itoa(counter, position, 10);
+		bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+std::string(wincount)+" victories!");
+		++counter;
+	}
+	std::vector<Score> global_scores;
+	BOOST_FOREACH(Score score, scores) {
+		std::vector<Score>::iterator it = std::find(global_scores.begin(), global_scores.end(), score);
+		if (it == global_scores.end()) {
+			global_scores.push_back(score);
+		} else {
+			it->win_count += score.win_count;
+			it->total_score += score.total_score;
 		}
 	}
+	bro->irc->privmsg(args[4], "Global 4U8N3O12! leaderboard:");
+	counter = 1;
+	BOOST_FOREACH(Score score, global_scores) {
+		char wincount[20];
+		_itoa(score.win_count, wincount, 10);
+		char totalscore[20];
+		_itoa(score.total_score, totalscore, 10);
+		char position[10];
+		_itoa(counter, position, 10);
+		bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+std::string(wincount)+" victories!");
+		++counter;
+	}
+};
+
+void Uno::updateScore(Brobot* bro, const std::string& nick, unsigned int score) {
+	bool found = false;
+	for (std::vector<Score>::iterator it = scores.begin(); it != scores.end(); ++it) {
+		if (it->channel != channel) continue;
+		if (it->nick != nick) continue;
+		it->win_count++;
+		it->total_score += score;
+		found = true;
+		break;
+	}
+	if (!found) {
+		scores.push_back(Score(nick, channel, score, 1));
+	}
+	std::sort(scores.begin(), scores.end());
+	std::ofstream file;
+	file.open(bro->stor->get("module.uno.scorefile").c_str(), std::ios::out);
+	if (!file) {
+		return; // OH WELL
+	}
+	std::string ch = "";
+	BOOST_FOREACH(Score sc, scores) {
+		if (ch != sc.channel) {
+			ch = sc.channel;
+			file << std::endl << ch;
+		}
+		file << " " << sc.nick << " " << sc.win_count << " " << sc.total_score;
+	}
+	file.close();
 };
 
 void Uno::onLoad(Brobot* bro) {
@@ -133,7 +176,7 @@ void Uno::onLoad(Brobot* bro) {
 };
 
 void Uno::onUnload(Brobot* bro) {
-	endGame(bro); // make sure the game ends properly (if any)
+	endGame(bro, false); // make sure the game ends properly (if any)
 	bro->unhook("[uno] gameStart", "OnPRIVMSG");
 	bro->unhook("[uno] help", "OnPRIVMSG");
 	bro->unhook("[uno] showScores", "OnPRIVMSG");
@@ -144,7 +187,7 @@ void Uno::help(Brobot* bro, Args& args) {
 		return;
 	bro->irc->privmsg(args[4], "           4U8N3O12! HELP");
 	bro->irc->privmsg(args[4], ".uno help           this help");
-	bro->irc->privmsg(args[4], ".uno score         display score totals");
+	bro->irc->privmsg(args[4], ".uno leaderboard    display leaderboard");
 	bro->irc->privmsg(args[4], ".uno                creates a game");
 	bro->irc->privmsg(args[4], ".join               joins the game");
 	bro->irc->privmsg(args[4], ".start              starts a created game");
@@ -178,7 +221,7 @@ void Uno::gameEnd(Brobot* bro, Args& args) {
 		bro->irc->privmsg(channel, "Only "+uno_creator+" can end the game!");
 		return;
 	}
-	endGame(bro);
+	endGame(bro, false);
 };
 
 void Uno::playCard(Brobot* bro, Args& args) {
@@ -234,7 +277,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			current_player->has_drawn = false;
 			current_player->has_challenged = false;
 			if (current_player->hand.empty()) {
-				endGame(bro);
+				endGame(bro, true);
 				return;
 			} else if (current_player->hand.size() == 1) {
 				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
@@ -265,7 +308,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			current_player->has_challenged = false;
 			has_to_draw_cards = 0;
 			if (current_player->hand.empty()) {
-				endGame(bro);
+				endGame(bro, true);
 				return;
 			} else if (current_player->hand.size() == 1) {
 				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
@@ -289,7 +332,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			current_player->has_challenged = false;
 			has_to_draw_cards += 2;
 			if (current_player->hand.empty()) {
-				endGame(bro);
+				endGame(bro, true);
 				return;
 			} else if (current_player->hand.size() == 1) {
 				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
@@ -336,7 +379,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			current_player->has_challenged = false;
 			has_to_draw_cards = 0;
 			if (current_player->hand.empty()) {
-				endGame(bro);
+				endGame(bro, true);
 				return;
 			} else if (current_player->hand.size() == 1) {
 				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
@@ -383,7 +426,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 			current_player->has_challenged = false;
 			has_to_draw_cards += 4;
 			if (current_player->hand.empty()) {
-				endGame(bro);
+				endGame(bro, true);
 				return;
 			} else if (current_player->hand.size() == 1) {
 				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
@@ -408,7 +451,7 @@ void Uno::playCard(Brobot* bro, Args& args) {
 		current_player->has_challenged = false;
 		has_to_draw_cards = 0;
 		if (current_player->hand.empty()) {
-			endGame(bro);
+			endGame(bro, true);
 			return;
 		} else if (current_player->hand.size() == 1) {
 			bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
@@ -622,7 +665,7 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 	printCard(bro, args[1], true, p.hand);
 };
 
-void Uno::endGame(Brobot* bro) {
+void Uno::endGame(Brobot* bro, bool updatescore) {
 	if (started == 0)
 		return;
 	bro->irc->privmsg(channel, "4U8N3O12! game in "+channel+" ended!");
@@ -659,6 +702,11 @@ void Uno::endGame(Brobot* bro) {
 		char tmpbuf[10]; // a really small one (but no one will have a score with more than 9 digits (right))
 		_itoa(score, tmpbuf, 10);
 		bro->irc->privmsg(channel, "Winner is "+winner+" with "+std::string(tmpbuf)+" points!");
+		if (updatescore) {
+			updateScore(bro, winner, score); // update in-memory scores and global_scores and write to file
+		} else {
+			bro->irc->privmsg(channel, "The stats of this match were not saved!");
+		}
 	}
 	started = 0;
 	channel.clear();
@@ -1054,7 +1102,7 @@ void Uno::partHook(Brobot* bro, Args& args) {
 		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
 			if (started == 2 && current_player == it)
 				nextPlayer();
-			endGame(bro);
+			endGame(bro, false);
 			return;
 		} else if (current_player == it && started == 2) {
 			nextPlayer(); // skip to the next player
@@ -1077,7 +1125,7 @@ void Uno::quitHook(Brobot* bro, Args& args) {
 		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
 			if (started == 2 && current_player == it)
 				nextPlayer();
-			endGame(bro);
+			endGame(bro, false);
 			return;
 		} else if (current_player == it && started == 2) {
 			nextPlayer(); // skip to the next player
@@ -1100,7 +1148,7 @@ void Uno::dropPlayer(Brobot* bro, Args& args) {
 		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
 			if (started == 2 && current_player == it)
 				nextPlayer();
-			endGame(bro);
+			endGame(bro, false);
 			return;
 		} else if (current_player == it && started == 2) {
 			nextPlayer(); // skip to the next player
