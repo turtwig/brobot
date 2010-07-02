@@ -100,54 +100,57 @@ Uno::Uno(Brobot* bro) : started(0), has_to_draw_cards(0),
 };
 
 void Uno::showScores(Brobot* bro, Args& args) {
-	if (args[5] != ".uno leaderboard" || args[4][0] != '#')
+	if (args[4][0] != '#')
 		return;
-	bro->irc->privmsg(args[4], "4U8N3O12! leaderboard for "+args[4]+":");
-	unsigned short int counter = 1;
-	BOOST_FOREACH(Score score, scores) {
-		if (score.channel != args[4]) continue;
-		char wincount[20];
-		_itoa(score.win_count, wincount, 10);
-		char totalscore[20];
-		_itoa(score.total_score, totalscore, 10);
-		char position[10];
-		_itoa(counter, position, 10);
-		std::string victories(wincount);
-		if (score.win_count == 1) {
-			victories += " victory!";
-		} else {
-			victories += " victories!";
+	if (args[5] == ".uno leaderboard") {
+		bro->irc->privmsg(args[4], "4U8N3O12! leaderboard for "+args[4]+":");
+		unsigned short int counter = 1;
+		BOOST_FOREACH(Score score, scores) {
+			if (score.channel != args[4]) continue;
+			char wincount[20];
+			_itoa(score.win_count, wincount, 10);
+			char totalscore[20];
+			_itoa(score.total_score, totalscore, 10);
+			char position[10];
+			_itoa(counter, position, 10);
+			std::string victories(wincount);
+			if (score.win_count == 1) {
+				victories += " victory!";
+			} else {
+				victories += " victories!";
+			}
+			bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+victories);
+			++counter;
 		}
-		bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+victories);
-		++counter;
-	}
-	std::vector<Score> global_scores;
-	BOOST_FOREACH(Score score, scores) {
-		std::vector<Score>::iterator it = std::find(global_scores.begin(), global_scores.end(), score);
-		if (it == global_scores.end()) {
-			global_scores.push_back(score);
-		} else {
-			it->win_count += score.win_count;
-			it->total_score += score.total_score;
+	} else if (args[5] == ".uno gleaderboard") {
+		std::vector<Score> global_scores;
+		BOOST_FOREACH(Score score, scores) {
+			std::vector<Score>::iterator it = std::find(global_scores.begin(), global_scores.end(), score);
+			if (it == global_scores.end()) {
+				global_scores.push_back(score);
+			} else {
+				it->win_count += score.win_count;
+				it->total_score += score.total_score;
+			}
 		}
-	}
-	bro->irc->privmsg(args[4], "Global 4U8N3O12! leaderboard:");
-	counter = 1;
-	BOOST_FOREACH(Score score, global_scores) {
-		char wincount[20];
-		_itoa(score.win_count, wincount, 10);
-		char totalscore[20];
-		_itoa(score.total_score, totalscore, 10);
-		char position[10];
-		_itoa(counter, position, 10);
-		std::string victories(wincount);
-		if (score.win_count == 1) {
-			victories += " victory!";
-		} else {
-			victories += " victories!";
+		bro->irc->privmsg(args[4], "Global 4U8N3O12! leaderboard:");
+		unsigned short int counter = 1;
+		BOOST_FOREACH(Score score, global_scores) {
+			char wincount[20];
+			_itoa(score.win_count, wincount, 10);
+			char totalscore[20];
+			_itoa(score.total_score, totalscore, 10);
+			char position[10];
+			_itoa(counter, position, 10);
+			std::string victories(wincount);
+			if (score.win_count == 1) {
+				victories += " victory!";
+			} else {
+				victories += " victories!";
+			}
+			bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+victories);
+			++counter;
 		}
-		bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+victories);
-		++counter;
 	}
 };
 
@@ -199,7 +202,8 @@ void Uno::help(Brobot* bro, Args& args) {
 		return;
 	bro->irc->privmsg(args[4], "           4U8N3O12! HELP");
 	bro->irc->privmsg(args[4], ".uno help           this help");
-	bro->irc->privmsg(args[4], ".uno leaderboard    display leaderboard");
+	bro->irc->privmsg(args[4], ".uno leaderboard    display leaderboard for the channel");
+	bro->irc->privmsg(args[4], ".uno gleaderboard   display global leaderboard");
 	bro->irc->privmsg(args[4], ".uno                creates a game");
 	bro->irc->privmsg(args[4], ".join               joins the game");
 	bro->irc->privmsg(args[4], ".start              starts a created game");
@@ -512,9 +516,19 @@ void Uno::challenge(Brobot* bro, Args& args) {
 		char tmpbuf[10];
 		_itoa(has_to_draw_cards, tmpbuf, 10);
 		bro->irc->privmsg(channel, ""+it->nick+"'s move was illegal and has to draw "+std::string(tmpbuf)+" cards!");
-		current_player->has_challenged = false; // challenge was successful
-		current_player = it;
-		current_player->has_challenged = true; // the previous player can't challenge himself
+		std::vector<Card> drawncards;
+		for (int i = 0; i < has_to_draw_cards; i++) {
+			drawncards.push_back(deck.back());
+			deck.pop_back();
+			if (deck.empty())
+				swapDecks();
+		}
+		bro->irc->notice(it->nick, "You have drawn:");
+		printCard(bro, it->nick, true, drawncards);
+		it->hand.insert(it->hand.end(), drawncards.begin(), drawncards.end());
+		has_to_draw_cards = 0;
+		bro->irc->privmsg(args[4], "Current discard:");
+		printCard(bro, channel, false, discard.back());
 		nextTurn(bro);
 	}
 };
@@ -1113,7 +1127,14 @@ void Uno::partHook(Brobot* bro, Args& args) {
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
-		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
+		if (current_player->nick == uno_creator && ((players.size() >= 3 && started == 2) || (players.size() == 2 && started == 1))) {
+			nextPlayer();
+			uno_creator = current_player->nick;
+			bro->irc->privmsg(channel, ""+uno_creator+" is now managing the game!");
+			if (started == 2) {
+				bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
+			}
+		} else if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
 			if (started == 2 && current_player == it)
 				nextPlayer();
 			endGame(bro, false);
@@ -1121,8 +1142,8 @@ void Uno::partHook(Brobot* bro, Args& args) {
 		} else if (current_player == it && started == 2) {
 			nextPlayer(); // skip to the next player
 			bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
-			discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		}
+		discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		dropped_players.push_back(args[1]);
 		std::string current_nick = current_player->nick;
 		players.erase(it);
@@ -1136,7 +1157,14 @@ void Uno::quitHook(Brobot* bro, Args& args) {
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
-		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
+		if (current_player->nick == uno_creator && ((players.size() >= 3 && started == 2) || (players.size() == 2 && started == 1))) {
+			nextPlayer();
+			uno_creator = current_player->nick;
+			bro->irc->privmsg(channel, ""+uno_creator+" is now managing the game!");
+			if (started == 2) {
+				bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
+			}
+		} else if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
 			if (started == 2 && current_player == it)
 				nextPlayer();
 			endGame(bro, false);
@@ -1144,8 +1172,8 @@ void Uno::quitHook(Brobot* bro, Args& args) {
 		} else if (current_player == it && started == 2) {
 			nextPlayer(); // skip to the next player
 			bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
-			discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		}
+		discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		dropped_players.push_back(args[1]);
 		std::string current_nick = current_player->nick;
 		players.erase(it);
@@ -1159,7 +1187,14 @@ void Uno::dropPlayer(Brobot* bro, Args& args) {
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
-		if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
+		if (current_player->nick == uno_creator && ((players.size() >= 3 && started == 2) || (players.size() == 2 && started == 1))) {
+			nextPlayer();
+			uno_creator = current_player->nick;
+			bro->irc->privmsg(channel, ""+uno_creator+" is now managing the game!");
+			if (started == 2) {
+				bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
+			}
+		} else if (players.size() == 1 || (players.size() <= 2 && started == 2)) {
 			if (started == 2 && current_player == it)
 				nextPlayer();
 			endGame(bro, false);
@@ -1167,8 +1202,8 @@ void Uno::dropPlayer(Brobot* bro, Args& args) {
 		} else if (current_player == it && started == 2) {
 			nextPlayer(); // skip to the next player
 			bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
-			discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		}
+		discard.insert(discard.begin(), it->hand.begin(), it->hand.end());
 		dropped_players.push_back(args[1]);
 		std::string current_nick = current_player->nick;
 		players.erase(it);
