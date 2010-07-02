@@ -112,7 +112,13 @@ void Uno::showScores(Brobot* bro, Args& args) {
 		_itoa(score.total_score, totalscore, 10);
 		char position[10];
 		_itoa(counter, position, 10);
-		bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+std::string(wincount)+" victories!");
+		std::string victories(wincount);
+		if (score.win_count == 1) {
+			victories += " victory!";
+		} else {
+			victories += " victories!";
+		}
+		bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+victories);
 		++counter;
 	}
 	std::vector<Score> global_scores;
@@ -134,7 +140,13 @@ void Uno::showScores(Brobot* bro, Args& args) {
 		_itoa(score.total_score, totalscore, 10);
 		char position[10];
 		_itoa(counter, position, 10);
-		bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+std::string(wincount)+" victories!");
+		std::string victories(wincount);
+		if (score.win_count == 1) {
+			victories += " victory!";
+		} else {
+			victories += " victories!";
+		}
+		bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+victories);
 		++counter;
 	}
 };
