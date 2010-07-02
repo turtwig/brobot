@@ -1028,6 +1028,8 @@ void Uno::joinHook(Brobot* bro, Args& args) {
 	for (int i = 0; i < 7; ++i) {
 		p.hand.push_back(deck.back());
 		deck.pop_back();
+		if (deck.empty())
+			swapDecks();
 	}
 	std::string current_nick = current_player->nick;
 	players.push_back(p);
