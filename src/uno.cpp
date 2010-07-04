@@ -489,7 +489,7 @@ void Uno::challenge(Brobot* bro, Args& args) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
 	}
-	if (current_player->has_challenged || current_player->has_drawn || (discard.back().attr != drawfour && has_to_draw_cards < 4)) {
+	if (current_player->has_challenged || current_player->has_drawn || discard.back().attr != drawfour || has_to_draw_cards < 4) {
 		bro->irc->privmsg(channel, "You can't do that!");
 		return;
 	}
