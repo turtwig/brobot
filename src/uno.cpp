@@ -558,6 +558,7 @@ void Uno::gameStart(Brobot* bro, Args& args) {
 	bro->hook("[uno] playCard", "OnPRIVMSG", boost::bind(&Uno::playCard, this, bro, _1));
 	bro->hook("[uno] challenge", "OnPRIVMSG", boost::bind(&Uno::challenge, this, bro, _1));
 	bro->hook("[uno] skipTurn", "OnPRIVMSG", boost::bind(&Uno::skipTurn, this, bro, _1));
+	bro->unhook("Ascii", "OnPRIVMSG");
 	bro->irc->privmsg(args[4], "Starting 4U8N3O12! game in "+args[4]+"!");
 	bro->irc->privmsg(args[4], "Say .join to join in and .start to start the game!");
 	// Deck cards
@@ -758,6 +759,7 @@ void Uno::endGame(Brobot* bro, bool updatescore) {
 	bro->unhook("[uno] playCard", "OnPRIVMSG");
 	bro->unhook("[uno] challenge", "OnPRIVMSG");
 	bro->unhook("[uno] skipTurn", "OnPRIVMSG");
+	bro->hook("Ascii", "OnPRIVMSG", boost::bind(&ascii, bro, _1));
 };
 
 void Uno::skipTurn(Brobot* bro, Args& args) {

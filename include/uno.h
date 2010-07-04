@@ -12,6 +12,8 @@
 #include "../include/Args.h"
 #include "../include/brobot.h"
 
+extern void ascii(Brobot* bot, Args& args);
+
 class Uno : public BaseModule {
 	enum Cardtype { none_, red, blue, green, yellow };
 	enum Cardattr { none, skip, reverse, drawtwo, drawfour, wild }; // drawfour is w+4, wild is just wild
