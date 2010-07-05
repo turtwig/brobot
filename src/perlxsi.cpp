@@ -1,4 +1,4 @@
-#include "../include/brobot.h"
+#include "brobot.h"
 
 #include <EXTERN.h>
 #include <perl.h>

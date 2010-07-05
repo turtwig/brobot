@@ -8,9 +8,9 @@
 #include <iterator>
 #include <sstream>
 #include <boost/timer.hpp> // for turn timer
-#include "../include/BaseModule.h"
-#include "../include/Args.h"
-#include "../include/brobot.h"
+#include "BaseModule.h"
+#include "Args.h"
+#include "brobot.h"
 
 extern void ascii(Brobot* bot, Args& args);
 
