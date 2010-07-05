@@ -9,6 +9,7 @@
 Brobot* g_bro;
 
 extern void ascii(Brobot* bot, Args& args);
+extern void jpegchat(Brobot* bro, Args& args);
 extern void PerlTest(Brobot* bro, Args& args);
 
 int main(int argc, char** argv, char** env) {
@@ -24,6 +25,7 @@ int main(int argc, char** argv, char** env) {
 			config = "..\\brobot.conf";
 		g_bro = new Brobot(io_service, context, config);
 		g_bro->hook("Ascii", "OnPRIVMSG", boost::bind(&ascii, g_bro, _1));
+		g_bro->hook("JPEGTOCHAT", "OnPRIVMSG", boost::bind(&jpegchat, g_bro, _1));
 		g_bro->hook("PerlTest", "OnPRIVMSG", boost::bind(&PerlTest, g_bro, _1));
 		CoreModule core;
 		core.module("Core", &core);

@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="C:\Users\Admin\Desktop\Brobot\include;&quot;C:\Program Files (x86)\boost\boost_1_42&quot;;&quot;C:\OpenSSL (x86)\include&quot;;C:\Perl510\lib\CORE"
-				PreprocessorDefinitions="WIN32;HAVE_DES_FCRYPT;USE_SITECUSTOMIZE;PERL_IMPLICIT_CONTEXT;PERL_IMPLICIT_SYS;PERL_MSVCRT_READFIX;WIN32_LEAN_AND_MEAN;WINVER=0x0601;_WIN32_WINNT=0x0601;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;HAVE_DES_FCRYPT;USE_SITECUSTOMIZE;PERL_IMPLICIT_CONTEXT;PERL_IMPLICIT_SYS;PERL_MSVCRT_READFIX;WIN32_LEAN_AND_MEAN;WINVER=0x0601;_WIN32_WINNT=0x0601;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;__GNU_LIBRARY__"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -115,7 +115,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="C:\Users\Admin\Desktop\Brobot\include;&quot;C:\Program Files (x86)\boost\boost_1_42&quot;;&quot;C:\OpenSSL (x86)\include&quot;;C:\Perl510\lib\CORE"
-				PreprocessorDefinitions="WIN32;HAVE_DES_FCRYPT;USE_SITECUSTOMIZE;PERL_IMPLICIT_CONTEXT;PERL_IMPLICIT_SYS;PERL_MSVCRT_READFIX;WIN32_LEAN_AND_MEAN;WINVER=0x0601;_WIN32_WINNT=0x0601;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;HAVE_DES_FCRYPT;USE_SITECUSTOMIZE;PERL_IMPLICIT_CONTEXT;PERL_IMPLICIT_SYS;PERL_MSVCRT_READFIX;WIN32_LEAN_AND_MEAN;WINVER=0x0601;_WIN32_WINNT=0x0601;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;__GNU_LIBRARY__"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="4"
@@ -210,7 +210,7 @@
 					Name="jpegtochat"
 					>
 					<File
-						RelativePath=".\src\modules\jpegtochat\jpegtochat.c"
+						RelativePath=".\src\modules\jpegtochat\jpegtochat.cpp"
 						>
 					</File>
 					<File

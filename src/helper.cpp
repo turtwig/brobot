@@ -34,3 +34,12 @@ void ascii(Brobot* bot, Args& args) {
 		line.clear();
 	}
 };
+
+extern int jpegmain(int argc, char **argv, char **envp);
+
+void jpegchat(Brobot* bro, Args& args) {
+	if (args[5] != ".jpegtochat")
+		return;
+	char* dicks[] = { "jpegtochat.exe", "-c", "mirc", "-d", "none", "-x", "80", "-y", "100", "file.jpg" };
+	jpegmain(10, dicks, NULL);
+};

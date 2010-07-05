@@ -9,6 +9,9 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 enum ptoc_client_t
 {
     cli_none,
@@ -55,5 +58,9 @@ double ptoc_get_aspect(enum ptoc_font_t font);
 const char *ptoc_geteol();
 
 unsigned char *ptoc_jpegtorgb(const char *fn, int *xp, int *yp);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif
