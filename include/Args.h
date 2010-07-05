@@ -13,7 +13,7 @@ class Args : private boost::noncopyable{
 	public:
 	Args& operator%(const char* string) { args.push_back(string); return *this; };
 	Args& operator%(const std::string& string) { args.push_back(string); return *this; };
-	std::string operator[](const unsigned int i) { return args[i]; };
+	std::string operator[](const unsigned int& i) { return args[i]; };
 	const std::vector<std::string>& vect() { return args; };
 };
 

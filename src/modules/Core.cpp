@@ -1,4 +1,4 @@
-#include "../include/Core.h"
+#include "modules/Core.h"
 
 void CoreModule::onLoad(Brobot* bro) {
 	// Parser functions

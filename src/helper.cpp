@@ -1,4 +1,4 @@
-#include "../include/brobot.h"
+#include "brobot.h"
 #include <fstream>
 
 void ascii(Brobot* bot, Args& args) {

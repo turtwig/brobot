@@ -1,10 +1,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include "../include/brobot.h"
-#include "../include/Core.h"
-#include "../include/uno.h"
-#include "../include/perl.h"
+#include "brobot.h"
+#include "modules/Core.h"
+#include "modules/uno.h"
+#include "broperl.h"
 
 Brobot* g_bro;
 

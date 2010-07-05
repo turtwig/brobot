@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files (x86)\boost\boost_1_42&quot;;&quot;C:\OpenSSL (x86)\include&quot;;C:\Perl510\lib\CORE"
+				AdditionalIncludeDirectories="C:\Users\Admin\Desktop\Brobot\include;&quot;C:\Program Files (x86)\boost\boost_1_42&quot;;&quot;C:\OpenSSL (x86)\include&quot;;C:\Perl510\lib\CORE"
 				PreprocessorDefinitions="WIN32;HAVE_DES_FCRYPT;USE_SITECUSTOMIZE;PERL_IMPLICIT_CONTEXT;PERL_IMPLICIT_SYS;PERL_MSVCRT_READFIX;WIN32_LEAN_AND_MEAN;WINVER=0x0601;_WIN32_WINNT=0x0601;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libeay32.lib ssleay32.lib perl510.lib"
+				AdditionalDependencies="libeay32.lib ssleay32.lib perl510.lib getopt.lib libjpeg-static-mt-debug.lib"
 				AdditionalLibraryDirectories="&quot;C:\Program Files (x86)\boost\boost_1_42\lib&quot;;&quot;C:\OpenSSL (x86)\lib&quot;;C:\Perl510\lib\CORE"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
@@ -114,7 +114,7 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;C:\Program Files (x86)\boost\boost_1_42&quot;;&quot;C:\OpenSSL (x86)\include&quot;;C:\Perl510\lib\CORE"
+				AdditionalIncludeDirectories="C:\Users\Admin\Desktop\Brobot\include;&quot;C:\Program Files (x86)\boost\boost_1_42&quot;;&quot;C:\OpenSSL (x86)\include&quot;;C:\Perl510\lib\CORE"
 				PreprocessorDefinitions="WIN32;HAVE_DES_FCRYPT;USE_SITECUSTOMIZE;PERL_IMPLICIT_CONTEXT;PERL_IMPLICIT_SYS;PERL_MSVCRT_READFIX;WIN32_LEAN_AND_MEAN;WINVER=0x0601;_WIN32_WINNT=0x0601;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -132,7 +132,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libeay32.lib ssleay32.lib perl510.lib"
+				AdditionalDependencies="libeay32.lib ssleay32.lib perl510.lib getopt.lib libjpeg-static-mt.lib"
 				AdditionalLibraryDirectories="&quot;C:\Program Files (x86)\boost\boost_1_42\lib&quot;;&quot;C:\OpenSSL (x86)\lib&quot;;C:\Perl510\lib\CORE"
 				GenerateDebugInformation="false"
 				OptimizeReferences="2"
@@ -176,10 +176,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Core.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\helper.cpp"
 				>
 			</File>
@@ -199,10 +195,30 @@
 				RelativePath=".\src\Storage.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\src\uno.cpp"
+			<Filter
+				Name="modules"
 				>
-			</File>
+				<File
+					RelativePath=".\src\modules\Core.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\modules\uno.cpp"
+					>
+				</File>
+				<Filter
+					Name="jpegtochat"
+					>
+					<File
+						RelativePath=".\src\modules\jpegtochat\jpegtochat.c"
+						>
+					</File>
+					<File
+						RelativePath=".\src\modules\jpegtochat\libptoc.c"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -226,15 +242,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\Core.h"
+				RelativePath=".\include\broperl.h"
 				>
 			</File>
 			<File
 				RelativePath=".\include\IRC.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\perl.h"
 				>
 			</File>
 			<File
@@ -249,10 +261,30 @@
 				RelativePath=".\include\Storage.h"
 				>
 			</File>
-			<File
-				RelativePath=".\include\uno.h"
+			<Filter
+				Name="modules"
 				>
-			</File>
+				<File
+					RelativePath=".\include\modules\Core.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\modules\uno.h"
+					>
+				</File>
+				<Filter
+					Name="jpegtochat"
+					>
+					<File
+						RelativePath=".\include\modules\jpegtochat\config.h"
+						>
+					</File>
+					<File
+						RelativePath=".\include\modules\jpegtochat\libptoc.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

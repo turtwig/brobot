@@ -2,4 +2,7 @@ this is a nice boat
 
 i would like to mention how to compile this but i'm not sure myself
 the .sln file should work if you're in windows otherwise idk idc
-links against perl boost and openssl
+links against perl boost openssl and libjpeg
+you also might need to do some ghetto shit like getting a windows getopt port or something
+
+shoutz to aempirei for writing jpegtochat shit owns

@@ -1,9 +1,9 @@
 #ifndef CORE_H_INCLUDED
 #define CORE_H_INCLUDED
 
-#include "../include/BaseModule.h"
-#include "../include/Args.h"
-#include "../include/brobot.h"
+#include "BaseModule.h"
+#include "Args.h"
+#include "brobot.h"
 #include <map>
 #include <vector>
 #include <cstdlib> // for itoa

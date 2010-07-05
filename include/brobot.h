@@ -1,13 +1,13 @@
 #ifndef BROBOT_H_INCLUDED
 #define BROBOT_H_INCLUDED
 
-#include "../include/BaseSocket.h" // Basic socket for polymorphic socket <=> sslsocket behavior
-#include "../include/Socket.h"
-#include "../include/SSLSocket.h"
+#include "BaseSocket.h" // Basic socket for polymorphic socket <=> sslsocket behavior
+#include "Socket.h"
+#include "SSLSocket.h"
 
-#include "../include/Storage.h" // manages the flatfile backend (basically a wrapper around std::map<std::string, std::string>, used for config file
-#include "../include/Args.h" // Used to pass a variable number of arguments to callbacks
-#include "../include/BaseModule.h"
+#include "Storage.h" // manages the flatfile backend (basically a wrapper around std::map<std::string, std::string>, used for config file
+#include "Args.h" // Used to pass a variable number of arguments to callbacks
+#include "BaseModule.h"
 
 #include <map> // Used for hooks
 #include <vector> // Used for hooks
@@ -92,6 +92,6 @@ class Brobot : private boost::noncopyable {
 	void parse(const std::string& s); // the actual parser, runs every time something is received from the server.
 };
 
-#include "../include/IRC.h" // member functions for easy IRC control, must be included after Brobot due to proper type qualifications
+#include "IRC.h" // member functions for easy IRC control, must be included after Brobot due to proper type qualifications
 
 #endif // BROBOT_H_INCLUDED

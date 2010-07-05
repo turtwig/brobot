@@ -1,4 +1,4 @@
-#include "..\include\uno.h"
+#include "modules/uno.h"
 
 Uno::Card::Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname) : number(num), type(col), attr(spec) {
 	if (fname == "")
