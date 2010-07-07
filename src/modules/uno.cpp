@@ -435,127 +435,38 @@ void Uno::gameStart(Brobot* const bro, const Args& args) {
 	bro->hook("[uno] playCard", "OnPRIVMSG", boost::bind(&Uno::playCard, this, bro, _1));
 	bro->hook("[uno] challenge", "OnPRIVMSG", boost::bind(&Uno::challenge, this, bro, _1));
 	bro->hook("[uno] skipTurn", "OnPRIVMSG", boost::bind(&Uno::skipTurn, this, bro, _1));
-	bro->unhook("Ascii", "OnPRIVMSG");
 	bro->irc->privmsg(args[4], "Starting 4U8N3O12! game in "+args[4]+"!");
 	bro->irc->privmsg(args[4], "Say .join to join in and .start to start the game!");
 	// Deck cards
 	// 19 red cards
-	deck.push_back(_0red);
-	deck.push_back(_1red);
-	deck.push_back(_2red);
-	deck.push_back(_3red);
-	deck.push_back(_4red);
-	deck.push_back(_5red);
-	deck.push_back(_6red);
-	deck.push_back(_7red);
-	deck.push_back(_8red);
-	deck.push_back(_9red);
-	deck.push_back(_1red);
-	deck.push_back(_2red);
-	deck.push_back(_3red);
-	deck.push_back(_4red);
-	deck.push_back(_5red);
-	deck.push_back(_6red);
-	deck.push_back(_7red);
-	deck.push_back(_8red);
-	deck.push_back(_9red);
+	deck.push_back(_0red); deck.push_back(_1red); deck.push_back(_2red); deck.push_back(_3red); deck.push_back(_4red); deck.push_back(_5red); deck.push_back(_6red);
+	deck.push_back(_7red); deck.push_back(_8red); deck.push_back(_9red); deck.push_back(_1red); deck.push_back(_2red); deck.push_back(_3red); deck.push_back(_4red);
+	deck.push_back(_5red); deck.push_back(_6red); deck.push_back(_7red); deck.push_back(_8red); deck.push_back(_9red);
 	// 19 blue cards
-	deck.push_back(_0blue);
-	deck.push_back(_1blue);
-	deck.push_back(_2blue);
-	deck.push_back(_3blue);
-	deck.push_back(_4blue);
-	deck.push_back(_5blue);
-	deck.push_back(_6blue);
-	deck.push_back(_7blue);
-	deck.push_back(_8blue);
-	deck.push_back(_9blue);
-	deck.push_back(_1blue);
-	deck.push_back(_2blue);
-	deck.push_back(_3blue);
-	deck.push_back(_4blue);
-	deck.push_back(_5blue);
-	deck.push_back(_6blue);
-	deck.push_back(_7blue);
-	deck.push_back(_8blue);
-	deck.push_back(_9blue);
+	deck.push_back(_0blue); deck.push_back(_1blue); deck.push_back(_2blue); deck.push_back(_3blue); deck.push_back(_4blue); deck.push_back(_5blue); deck.push_back(_6blue);
+	deck.push_back(_7blue); deck.push_back(_8blue); deck.push_back(_9blue); deck.push_back(_1blue); deck.push_back(_2blue); deck.push_back(_3blue); deck.push_back(_4blue);
+	deck.push_back(_5blue); deck.push_back(_6blue); deck.push_back(_7blue); deck.push_back(_8blue); deck.push_back(_9blue);
 	// 19 green cards
-	deck.push_back(_0green);
-	deck.push_back(_1green);
-	deck.push_back(_2green);
-	deck.push_back(_3green);
-	deck.push_back(_4green);
-	deck.push_back(_5green);
-	deck.push_back(_6green);
-	deck.push_back(_7green);
-	deck.push_back(_8green);
-	deck.push_back(_9green);
-	deck.push_back(_1green);
-	deck.push_back(_2green);
-	deck.push_back(_3green);
-	deck.push_back(_4green);
-	deck.push_back(_5green);
-	deck.push_back(_6green);
-	deck.push_back(_7green);
-	deck.push_back(_8green);
-	deck.push_back(_9green);
+	deck.push_back(_0green); deck.push_back(_1green); deck.push_back(_2green); deck.push_back(_3green); deck.push_back(_4green); deck.push_back(_5green); deck.push_back(_6green);
+	deck.push_back(_7green); deck.push_back(_8green); deck.push_back(_9green); deck.push_back(_1green); deck.push_back(_2green); deck.push_back(_3green); deck.push_back(_4green);
+	deck.push_back(_5green); deck.push_back(_6green); deck.push_back(_7green); deck.push_back(_8green); deck.push_back(_9green);
 	// 19 yellow cards
-	deck.push_back(_0yellow);
-	deck.push_back(_1yellow);
-	deck.push_back(_2yellow);
-	deck.push_back(_3yellow);
-	deck.push_back(_4yellow);
-	deck.push_back(_5yellow);
-	deck.push_back(_6yellow);
-	deck.push_back(_7yellow);
-	deck.push_back(_8yellow);
-	deck.push_back(_9yellow);
-	deck.push_back(_1yellow);
-	deck.push_back(_2yellow);
-	deck.push_back(_3yellow);
-	deck.push_back(_4yellow);
-	deck.push_back(_5yellow);
-	deck.push_back(_6yellow);
-	deck.push_back(_7yellow);
-	deck.push_back(_8yellow);
-	deck.push_back(_9yellow);
-	// Draw two cards
-	deck.push_back(_p2red);
-	deck.push_back(_p2red);
-	deck.push_back(_p2blue);
-	deck.push_back(_p2blue);
-	deck.push_back(_p2green);
-	deck.push_back(_p2green);
-	deck.push_back(_p2yellow);
-	deck.push_back(_p2yellow);
-	// Reverse cards
-	deck.push_back(_skipred);
-	deck.push_back(_skipred);
-	deck.push_back(_skipblue);
-	deck.push_back(_skipblue);
-	deck.push_back(_skipgreen);
-	deck.push_back(_skipgreen);
-	deck.push_back(_skipyellow);
-	deck.push_back(_skipyellow);
-	// Skip cards
-	deck.push_back(_reversered);
-	deck.push_back(_reversered);
-	deck.push_back(_reverseblue);
-	deck.push_back(_reverseblue);
-	deck.push_back(_reversegreen);
-	deck.push_back(_reversegreen);
-	deck.push_back(_reverseyellow);
-	deck.push_back(_reverseyellow);
-	// Wild cards
-	deck.push_back(_wild);
-	deck.push_back(_wild);
-	deck.push_back(_wild);
-	deck.push_back(_wild);
-	// Wild+4 cards
-	deck.push_back(_p4wild);
-	deck.push_back(_p4wild);
-	deck.push_back(_p4wild);
-	deck.push_back(_p4wild);
+	deck.push_back(_0yellow); deck.push_back(_1yellow); deck.push_back(_2yellow); deck.push_back(_3yellow); deck.push_back(_4yellow); deck.push_back(_5yellow); deck.push_back(_6yellow);
+	deck.push_back(_7yellow); deck.push_back(_8yellow); deck.push_back(_9yellow); deck.push_back(_1yellow); deck.push_back(_2yellow); deck.push_back(_3yellow); deck.push_back(_4yellow);
+	deck.push_back(_5yellow); deck.push_back(_6yellow); deck.push_back(_7yellow); deck.push_back(_8yellow); deck.push_back(_9yellow);
+	// 8 Draw two cards
+	deck.push_back(_p2red); deck.push_back(_p2red); deck.push_back(_p2blue); deck.push_back(_p2blue);
+	deck.push_back(_p2green); deck.push_back(_p2green); deck.push_back(_p2yellow); deck.push_back(_p2yellow);
+	// 8 Skip cards
+	deck.push_back(_skipred); deck.push_back(_skipred); deck.push_back(_skipblue); deck.push_back(_skipblue);
+	deck.push_back(_skipgreen); deck.push_back(_skipgreen); deck.push_back(_skipyellow); deck.push_back(_skipyellow);
+	// 8 Reverse cards
+	deck.push_back(_reversered); deck.push_back(_reversered); deck.push_back(_reverseblue); deck.push_back(_reverseblue);
+	deck.push_back(_reversegreen); deck.push_back(_reversegreen); deck.push_back(_reverseyellow); deck.push_back(_reverseyellow);
+	// 4 Wild cards
+	deck.push_back(_wild); deck.push_back(_wild); deck.push_back(_wild); deck.push_back(_wild);
+	// 4 Wild+4 cards
+	deck.push_back(_p4wild); deck.push_back(_p4wild); deck.push_back(_p4wild); deck.push_back(_p4wild);
 	// shuffle the deck
 	random_shuffle(deck.begin(), deck.end());
 	Player p(args[1]);
@@ -603,7 +514,7 @@ void Uno::endGame(Brobot* const bro, bool updatescore) {
 		}
 		bro->irc->privmsg(channel, "Winner is "+winner+" with "+boost::lexical_cast<std::string>(score)+" points!");
 		if (updatescore) {
-			updateScore(bro, winner, score); // update in-memory scores and global_scores and write to file
+			updateScore(bro, winner, score); // update in-memory scores and write to file
 		} else {
 			bro->irc->privmsg(channel, "The stats of this match were not saved!");
 		}
@@ -632,7 +543,6 @@ void Uno::endGame(Brobot* const bro, bool updatescore) {
 	bro->unhook("[uno] playCard", "OnPRIVMSG");
 	bro->unhook("[uno] challenge", "OnPRIVMSG");
 	bro->unhook("[uno] skipTurn", "OnPRIVMSG");
-	bro->hook("Ascii", "OnPRIVMSG", boost::bind(&ascii, bro, _1));
 };
 
 void Uno::skipTurn(Brobot* const bro, const Args& args) {
