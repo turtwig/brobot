@@ -1,3 +1,6 @@
+#ifndef JPEGTOCHAT_CONFIG_H_INCLUDED
+#define JPEGTOCHAT_CONFIG_H_INCLUDED
+
 #ifdef _WIN32
 #define strcasecmp _stricmp
 #define snprintf _snprintf
@@ -7,3 +10,5 @@
 #else
 #include <unistd.h>
 #endif
+
+#endif // JPEGTOCHAT_CONFIG_H_INCLUDED

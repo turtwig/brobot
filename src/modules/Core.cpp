@@ -141,17 +141,26 @@ void CoreModule::onconnect(Brobot* const bro, const Args& arg) {
 	unsigned short int h = 0;
 	std::string str = "";
 	do {
-		char tmpbuf[10];
-		_itoa(h, tmpbuf, 10);
-		str = bro->stor->get("core.onconnect."+std::string(tmpbuf));
+		str = bro->stor->get("core.onconnect."+boost::lexical_cast<std::string>(h));
 		bro->irc->raw(str);
 		++h;
 	} while(str != "");
 	bro->unhook("[core] OnConnect", "Numeric001"); // this hook only needs to run once
 };
 
-void CoreModule::module(const std::string& name, BaseModule* mod) {
+void CoreModule::module(const std::string& name, BaseModule* const mod) {
 	all_mods[name] = mod; // add module to list of modules that can be loaded
+};
+
+void CoreModule::loadMods(Brobot* const bro) {
+	unsigned short int h = 0;
+	std::string str = "";
+	do {
+		str = bro->stor->get("core.modules."+boost::lexical_cast<std::string>(h));
+		if (all_mods.find(str) != all_mods.end())
+			bro->loadMod(str, all_mods[str]);
+		++h;
+	} while(str != "");
 };
 
 void CoreModule::modulelist(Brobot* const bro, const Args& args) {

@@ -5,14 +5,15 @@
 #include "brobot.h"
 #include <map>
 #include <vector>
-#include <cstdlib> // for itoa
 #include <string>
 #include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 
 class CoreModule : public BaseModule {
 	std::map<std::string, BaseModule*> all_mods; // hold a BaseModule* pointer for every module that gets registered so we can load/unload them
 	public:
-	void module(const std::string& name, BaseModule* mod);
+	void module(const std::string& name, BaseModule* const mod);
+	void loadMods(Brobot* const bro);
 	// Brobot stuff:
 	void onLoad(Brobot* const bro);
 	void onUnload(Brobot* const bro);

@@ -61,6 +61,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libeay32.lib ssleay32.lib perl510.lib getopt.lib libjpeg-static-mt-debug.lib"
 				AdditionalLibraryDirectories="&quot;C:\Program Files (x86)\boost\boost_1_42\lib&quot;;&quot;C:\OpenSSL (x86)\lib&quot;;C:\Perl510\lib\CORE"
+				IgnoreDefaultLibraryNames="LIBCMT;LIBCMTD"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -134,6 +135,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libeay32.lib ssleay32.lib perl510.lib getopt.lib libjpeg-static-mt.lib"
 				AdditionalLibraryDirectories="&quot;C:\Program Files (x86)\boost\boost_1_42\lib&quot;;&quot;C:\OpenSSL (x86)\lib&quot;;C:\Perl510\lib\CORE"
+				IgnoreDefaultLibraryNames="LIBCMT;LIBCMTD"
 				GenerateDebugInformation="false"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

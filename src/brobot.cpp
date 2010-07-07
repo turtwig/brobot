@@ -38,7 +38,7 @@ void Brobot::runHooks(const std::string& hook, const Args& arg) {
 	if (callbacks.find(hook) == callbacks.end())
 		return; // no such hook map
 	typedef std::pair<std::string, std::string> unhook_t;
-	BOOST_FOREACH( unhook_t penis, hooks_to_unhook ) {
+	BOOST_FOREACH(unhook_t penis, hooks_to_unhook) {
 		std::map<std::string, callback_map_t>::iterator upper_iter = callbacks.find(penis.second);
 		if (upper_iter != callbacks.end()) { // look for hooks
 			callback_map_t::iterator lower_iter = upper_iter->second.find(penis.first);
@@ -51,7 +51,7 @@ void Brobot::runHooks(const std::string& hook, const Args& arg) {
 		}
 	}
 	hooks_to_unhook.clear();
-	BOOST_FOREACH( penis_t h, callbacks[hook] )
+	BOOST_FOREACH(penis_t h, callbacks[hook])
 		h.second(arg);
 };
 
@@ -117,6 +117,6 @@ void Brobot::parse(const std::string& s) {
 	}
 	parsers_to_delete.clear();
 	typedef std::pair<std::string, boost::function<void (const std::string&)> > pair_t;
-	BOOST_FOREACH( pair_t p, parserEvents )
+	BOOST_FOREACH(pair_t p, parserEvents)
 		p.second(s); // each parser function is responsible for firing the appropriate hooks
 };

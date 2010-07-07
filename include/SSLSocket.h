@@ -1,19 +1,15 @@
 #ifndef SSLSOCKET_H_INCLUDED
 #define SSLSOCKET_H_INCLUDED
 
-#include "../include/BaseSocket.h"
+#include "BaseSocket.h"
 #include <boost/asio/ssl.hpp>
 
-using boost::asio::ip::tcp;
-
 class SSLSocket : public BaseSocket {
-	boost::asio::ssl::stream<tcp::socket> sock;
-	tcp::resolver::iterator iterator;
-	boost::asio::streambuf response;
+	boost::asio::ssl::stream<boost::asio::ip::tcp::socket> sock;
 	public:
 	SSLSocket (const char* host, const char* port, boost::asio::io_service& io, boost::asio::ssl::context& context) : sock(io, context) {
-		tcp::resolver resolver(io);
-		tcp::resolver::query query(tcp::v4(), host, port);
+		boost::asio::ip::tcp::resolver resolver(io);
+		boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), host, port);
 		iterator = resolver.resolve(query);
 	};
 

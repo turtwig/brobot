@@ -91,7 +91,7 @@ Uno::Uno(Brobot* const bro) : started(0), has_to_draw_cards(0),
 			std::istringstream iss(line);
 			std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), std::back_inserter<std::vector<std::string> >(tokens));
 			for (unsigned short int i = 0; i < tokens.size(); i += 3) {  // i+0 -> nick, i+1-> win number, i+2-> total score
-				scores.push_back(Score(tokens[i], ch, atoi(tokens[i+2].c_str()), atoi(tokens[i+1].c_str())));
+				scores.push_back(Score(tokens[i], ch, boost::lexical_cast<unsigned int>(tokens[i+2]), boost::lexical_cast<unsigned int>(tokens[i+1])));
 			}
 		}
 		std::sort(scores.begin(), scores.end());
@@ -107,19 +107,13 @@ void Uno::showScores(Brobot* const bro, const Args& args) {
 		unsigned short int counter = 1;
 		BOOST_FOREACH(Score score, scores) {
 			if (score.channel != args[4]) continue;
-			char wincount[20];
-			_itoa(score.win_count, wincount, 10);
-			char totalscore[20];
-			_itoa(score.total_score, totalscore, 10);
-			char position[10];
-			_itoa(counter, position, 10);
-			std::string victories(wincount);
+			std::string victories(boost::lexical_cast<std::string>(score.win_count));
 			if (score.win_count == 1) {
 				victories += " victory!";
 			} else {
 				victories += " victories!";
 			}
-			bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+victories);
+			bro->irc->privmsg(args[4], boost::lexical_cast<std::string>(counter)+") "+score.nick+" with "+boost::lexical_cast<std::string>(score.total_score)+" points and "+victories);
 			++counter;
 		}
 	} else if (args[5] == ".uno gleaderboard") {
@@ -136,19 +130,13 @@ void Uno::showScores(Brobot* const bro, const Args& args) {
 		bro->irc->privmsg(args[4], "Global 4U8N3O12! leaderboard:");
 		unsigned short int counter = 1;
 		BOOST_FOREACH(Score score, global_scores) {
-			char wincount[20];
-			_itoa(score.win_count, wincount, 10);
-			char totalscore[20];
-			_itoa(score.total_score, totalscore, 10);
-			char position[10];
-			_itoa(counter, position, 10);
-			std::string victories(wincount);
+			std::string victories(boost::lexical_cast<std::string>(score.win_count));
 			if (score.win_count == 1) {
 				victories += " victory!";
 			} else {
 				victories += " victories!";
 			}
-			bro->irc->privmsg(args[4], std::string(position)+") "+score.nick+" with "+std::string(totalscore)+" points and "+victories);
+			bro->irc->privmsg(args[4], boost::lexical_cast<std::string>(counter)+") "+score.nick+" with "+boost::lexical_cast<std::string>(score.total_score)+" points and "+victories);
 			++counter;
 		}
 	}
@@ -256,19 +244,19 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 	switch(args[5][4+h]) {
 		case 'r':
 			color = red;
-			number = atoi(&(args[5][5+h]));
+			number = boost::lexical_cast<unsigned short int>(args[5][5+h]);
 			break;
 		case 'b':
 			color = blue;
-			number = atoi(&(args[5][5+h]));
+			number = boost::lexical_cast<unsigned short int>(args[5][5+h]);
 			break;
 		case 'g':
 			color = green;
-			number = atoi(&(args[5][5+h]));
+			number = boost::lexical_cast<unsigned short int>(args[5][5+h]);
 			break;
 		case 'y':
 			color = yellow;
-			number = atoi(&(args[5][5+h]));
+			number = boost::lexical_cast<unsigned short int>(args[5][5+h]);
 			break;
 		case 'w':
 			color = none_;
@@ -508,14 +496,10 @@ void Uno::challenge(Brobot* const bro, const Args& args) {
 	}
 	if (!invalid) {
 		has_to_draw_cards += 2;
-		char tmpbuf[10];
-		_itoa(has_to_draw_cards, tmpbuf, 10);
-		bro->irc->privmsg(channel, ""+it->nick+"'s move was legal and "+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
+		bro->irc->privmsg(channel, ""+it->nick+"'s move was legal and "+current_player->nick+" must draw "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 		return;
 	} else {
-		char tmpbuf[10];
-		_itoa(has_to_draw_cards, tmpbuf, 10);
-		bro->irc->privmsg(channel, ""+it->nick+"'s move was illegal and has to draw "+std::string(tmpbuf)+" cards!");
+		bro->irc->privmsg(channel, ""+it->nick+"'s move was illegal and has to draw "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 		std::vector<Card> drawncards;
 		for (int i = 0; i < has_to_draw_cards; i++) {
 			drawncards.push_back(deck.back());
@@ -700,9 +684,7 @@ void Uno::endGame(Brobot* const bro, bool updatescore) {
 		std::string winner = current_player->nick;
 		if (has_to_draw_cards != 0) {
 			nextPlayer();
-			char tmpbuf[10];
-			_itoa(has_to_draw_cards, tmpbuf, 10);
-			bro->irc->privmsg(channel, ""+current_player->nick+" draws "+std::string(tmpbuf)+" cards!");
+			bro->irc->privmsg(channel, ""+current_player->nick+" draws "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 			for (int i = 0; i < has_to_draw_cards; i++) {
 				current_player->hand.push_back(deck.back());
 				deck.pop_back();
@@ -726,9 +708,7 @@ void Uno::endGame(Brobot* const bro, bool updatescore) {
 				}
 			}
 		}
-		char tmpbuf[10]; // a really small one (but no one will have a score with more than 9 digits (right))
-		_itoa(score, tmpbuf, 10);
-		bro->irc->privmsg(channel, "Winner is "+winner+" with "+std::string(tmpbuf)+" points!");
+		bro->irc->privmsg(channel, "Winner is "+winner+" with "+boost::lexical_cast<std::string>(score)+" points!");
 		if (updatescore) {
 			updateScore(bro, winner, score); // update in-memory scores and global_scores and write to file
 		} else {
@@ -769,9 +749,7 @@ void Uno::skipTurn(Brobot* const bro, const Args& args) {
 	if (it == players.end())
 		return;
 	if (turntimer.elapsed() < 60) {
-		char tmpbuf[10];
-		_itoa(60-turntimer.elapsed(), tmpbuf, 10);
-		bro->irc->privmsg(channel, "You need to wait "+std::string(tmpbuf)+" more seconds!");
+		bro->irc->privmsg(channel, "You need to wait "+boost::lexical_cast<std::string>(60-turntimer.elapsed())+" more seconds!");
 		return;
 	}
 	bro->irc->privmsg(channel, ""+current_player->nick+" is taking too long to play and has been skipped!");
@@ -784,9 +762,7 @@ void Uno::skipTurn(Brobot* const bro, const Args& args) {
 		nextTurn(bro);
 	} else {
 		if (has_to_draw_cards != 0) {
-			char tmpbuf[10];
-			_itoa(has_to_draw_cards, tmpbuf, 10);
-			bro->irc->privmsg(channel, ""+current_player->nick+" draws "+std::string(tmpbuf)+" cards!");
+			bro->irc->privmsg(channel, ""+current_player->nick+" draws "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 			std::vector<Card> drawncards;
 			for (int i = 0; i < has_to_draw_cards; i++) {
 				drawncards.push_back(deck.back());
@@ -927,9 +903,7 @@ void Uno::drawCard(Brobot* const bro, const Args& args) {
 		return;
 	}
 	if (has_to_draw_cards != 0) {
-		char tmpbuf[10];
-		_itoa(has_to_draw_cards, tmpbuf, 10);
-		bro->irc->privmsg(channel, ""+args[1]+" draws "+std::string(tmpbuf)+" cards!");
+		bro->irc->privmsg(channel, ""+args[1]+" draws "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 		std::vector<Card> drawncards;
 		for (int i = 0; i < has_to_draw_cards; i++) {
 			drawncards.push_back(deck.back());
@@ -997,9 +971,7 @@ void Uno::nextTurn(Brobot* const bro) {
 	bro->irc->privmsg(channel, "It is now "+current_player->nick+"'s turn!");
 	if (discard.back().attr == none) {
 	} else if (has_to_draw_cards != 0) {
-		char tmpbuf[10];
-		_itoa(has_to_draw_cards, tmpbuf, 10);
-		bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
+		bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 	}
 	if (discard.back().attr == wild || discard.back().attr == drawfour) {
 		switch(discard.back().type) {
@@ -1071,9 +1043,7 @@ void Uno::listPlayers(Brobot* const bro, const Args& args) {
 	if (started == 2) {
 		bro->irc->privmsg(args[4], "It is "+current_player->nick+"'s turn!");
 		BOOST_FOREACH(Player p, players) {
-			char tmpbuf[10];
-			_itoa(p.hand.size(), tmpbuf, 10);
-			bro->irc->privmsg(args[4], ""+p.nick+" has "+std::string(tmpbuf)+" cards!");
+			bro->irc->privmsg(args[4], ""+p.nick+" has "+boost::lexical_cast<std::string>(p.hand.size())+" cards!");
 		}
 	}
 };
@@ -1103,11 +1073,8 @@ void Uno::showDiscard(Brobot* const bro, const Args& args) {
 				break;
 		}
 	}
-	if (has_to_draw_cards != 0) {
-		char tmpbuf[10];
-		_itoa(has_to_draw_cards, tmpbuf, 10);
-		bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+std::string(tmpbuf)+" cards!");
-	}
+	if (has_to_draw_cards != 0)
+		bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 };
 
 void Uno::nickHook(Brobot* const bro, const Args& args) {

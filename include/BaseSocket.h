@@ -6,6 +6,9 @@
 #include <boost/asio.hpp>
 
 class BaseSocket : private boost::noncopyable{
+	protected:
+	boost::asio::ip::tcp::resolver::iterator iterator;
+	boost::asio::streambuf response;
 	public:
 	virtual void connect() = 0;
 	virtual void close() = 0;

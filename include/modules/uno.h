@@ -1,6 +1,5 @@
 #ifndef UNO_H_INCLUDED
 #define UNO_H_INCLUDED
-#include <cstdlib> // for itoa/atoi
 #include <string>
 #include <vector>
 #include <fstream>
@@ -8,6 +7,7 @@
 #include <iterator>
 #include <sstream>
 #include <boost/timer.hpp> // for turn timer
+#include <boost/lexical_cast.hpp>
 #include "BaseModule.h"
 #include "brobot.h"
 

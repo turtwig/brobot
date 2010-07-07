@@ -22,6 +22,11 @@ core.onconnect.1 PART #faggots :emopart
 core.owner.nick homo
 core.owner.ident fag
 core.owner.host sucksdicks.com
+// list of modules to load at start
+// goes from 0 to however much needed
+// make sure you have the Core module here
+core.modules.0 Core
+core.modules.1 Uno
 // ascii directory
 module.ascii.dir C:\some\ascii\path\
 // or

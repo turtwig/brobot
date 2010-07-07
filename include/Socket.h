@@ -3,16 +3,12 @@
 
 #include "BaseSocket.h"
 
-using boost::asio::ip::tcp;
-
 class Socket : public BaseSocket {
-	tcp::socket sock;
-	tcp::resolver::iterator iterator;
-	boost::asio::streambuf response;
+	boost::asio::ip::tcp::socket sock;
 	public:
 	Socket (const char* host, const char* port, boost::asio::io_service& io) : sock(io) {
-		tcp::resolver resolver(io);
-		tcp::resolver::query query(tcp::v4(), host, port);
+		boost::asio::ip::tcp::resolver resolver(io);
+		boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), host, port);
 		iterator = resolver.resolve(query);
 	};
 
