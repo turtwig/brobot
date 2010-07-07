@@ -109,7 +109,7 @@ std::map<std::string, std::vector<std::string> > Brobot::listHooks() {
 };
 
 void Brobot::parse(const std::string& s) {
-	BOOST_FOREACH( std::string name, parsers_to_delete) {
+	BOOST_FOREACH(std::string name, parsers_to_delete) {
 		std::map<std::string, boost::function<void (const std::string&)> >::iterator it = parserEvents.find(name);
 		if (it != parserEvents.end()) {
 			parserEvents.erase(it);

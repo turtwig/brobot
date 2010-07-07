@@ -9,6 +9,7 @@
 #include <sstream>
 #include <boost/timer.hpp> // for turn timer
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 #include "BaseModule.h"
 #include "brobot.h"
 
@@ -17,6 +18,8 @@ extern void ascii(Brobot* bot, const Args& args);
 class Uno : public BaseModule {
 	enum Cardtype { none_, red, blue, green, yellow };
 	enum Cardattr { none, skip, reverse, drawtwo, drawfour, wild }; // drawfour is w+4, wild is just wild
+	Cardtype strtocol(const std::string& str);
+	Cardattr strtoattr(const std::string& str);
 	struct Card {
 		short int number; // -1 = special card
 		Cardtype type;
@@ -67,6 +70,14 @@ class Uno : public BaseModule {
 	void nextTurn(Brobot* const bro);
 	void endGame(Brobot* const bro, bool updatescore);
 	void updateScore(Brobot* const bro, const std::string& nick, unsigned int score);
+	inline void pl_card(Brobot* const bro, const std::vector<Card>::iterator& it) {
+		bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
+		printCard(bro, channel, false, *it);
+		discard.push_back(*it);
+		current_player->hand.erase(it);
+		current_player->has_drawn = false;
+		current_player->has_challenged = false;
+	};
 	public:
 	Uno(Brobot* const bro);
 	void onLoad(Brobot* const bro);

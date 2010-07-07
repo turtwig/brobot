@@ -61,8 +61,8 @@ void CoreModule::numerics(Brobot* const bro, const std::string& str) {
  */
 void CoreModule::commands(Brobot* const bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) (\\S+?) (\\S+?) :(.+?)$"); // matches :NICK!IDENT@HOST COMMAND TARGET :MESSAGE
-	boost::cmatch match;
-	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
+	boost::smatch match;
+	if (!boost::regex_match(str, match, expr)) // we did not get a match
 		return; // nothing else to do
 	if (match[4] == "PART")
 		return;
@@ -77,8 +77,8 @@ void CoreModule::commands(Brobot* const bro, const std::string& str) {
  */
 void CoreModule::nick(Brobot* const bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) NICK :(\\S+?)$"); // matches NICK!IDENT@HOST NICK :NEWNICK
-	boost::cmatch match;
-	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
+	boost::smatch match;
+	if (!boost::regex_match(str, match, expr)) // we did not get a match
 		return; // nothing else to do
 	Args arg;
 	arg % str % match[1] % match[4] % match[2] % match[3];
@@ -91,8 +91,8 @@ void CoreModule::nick(Brobot* const bro, const std::string& str) {
  */
 void CoreModule::joinpart(Brobot* const bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) (JOIN|PART) :?(#\\S+?)( :(.+?))?$"); // matches NICK!IDENT@HOST JOIN|PART :?#CHANNEL
-	boost::cmatch match;
-	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
+	boost::smatch match;
+	if (!boost::regex_match(str, match, expr)) // we did not get a match
 		return; // nothing else to do
 	Args arg;
 	arg % str % match[1] % match[2] % match[3] % match[5] % match[7];
@@ -105,8 +105,8 @@ void CoreModule::joinpart(Brobot* const bro, const std::string& str) {
  */
 void CoreModule::quit(Brobot* const bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) QUIT :(.+?)$"); // matches NICK!IDENT@HOST QUIT :MESSAGE
-	boost::cmatch match;
-	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
+	boost::smatch match;
+	if (!boost::regex_match(str, match, expr)) // we did not get a match
 		return; // nothing else to do
 	Args arg;
 	arg % str % match[1] % match[2] % match[3] % match[4];

@@ -23,6 +23,50 @@ void Uno::printCard(Brobot* const bro, const std::string& target, bool notice, c
 	}
 };
 
+Uno::Cardtype Uno::strtocol(const std::string& str) {
+	Cardtype col;
+	switch (str[0]) {
+		case 'r':
+			col = red;
+			break;
+		case 'b':
+			col = blue;
+			break;
+		case 'g':
+			col = green;
+			break;
+		case 'y':
+			col = yellow;
+			break;
+		case 'w':
+			col = none_;
+			break;
+	}
+	return col;
+};
+
+Uno::Cardattr Uno::strtoattr(const std::string& str) {
+	Cardattr attr;
+	switch (str[0]) {
+		case 'r':
+			attr = reverse;
+			break;
+		case 's':
+			attr = skip;
+			break;
+		case '+':
+			if (str[1] == '2') {
+				attr = drawtwo;
+			} else {
+				attr = drawfour;
+			}
+			break;
+		default:
+			attr = none;
+	}
+	return attr;
+};
+
 void Uno::printCard(Brobot* const bro, const std::string& target, bool notice, std::vector<Card> cards) { // multiple cards
 	while(!cards.empty()) {
 		std::vector<Card>::iterator it;
@@ -35,7 +79,7 @@ void Uno::printCard(Brobot* const bro, const std::string& target, bool notice, s
 		cards.erase(cards.begin(), it);
 		for (int i = 0; i < 14; ++i) {
 			std::string line;
-			BOOST_FOREACH( Card c, tmpcards ) {
+			BOOST_FOREACH(Card c, tmpcards) {
 				line += c.ascii[i];
 				line += " ";
 			}
@@ -74,11 +118,8 @@ Uno::Uno(Brobot* const bro) : started(0), has_to_draw_cards(0),
 						_8yellow(bro, 8, yellow, none, "8yellow.txt"), _9yellow(bro, 9, yellow, none, "9yellow.txt"), _p2yellow(bro, -1, yellow, drawtwo, "+2yellow.txt"), _skipyellow(bro, -1, yellow, skip, "skipyellow.txt"),
 						_reverseyellow(bro, -1, yellow, reverse, "reverseyellow.txt"),
 						_wild(bro, -1, red, wild, "wild.txt"), _p4wild(bro, -1, red, drawfour, "wild+4.txt") {
-	std::string scorefile = bro->stor->get("module.uno.scorefile");
-	if (scorefile == "")
-		return;
 	std::ifstream file;
-	file.open(scorefile.c_str(), std::ios::in);
+	file.open(bro->stor->getcstr("module.uno.scorefile"), std::ios::in);
 	if (file) {
 		while (!file.eof()) {
 			std::string line;
@@ -95,8 +136,8 @@ Uno::Uno(Brobot* const bro) : started(0), has_to_draw_cards(0),
 			}
 		}
 		std::sort(scores.begin(), scores.end());
+		file.close();
 	}
-	file.close();
 };
 
 void Uno::showScores(Brobot* const bro, const Args& args) {
@@ -158,18 +199,17 @@ void Uno::updateScore(Brobot* const bro, const std::string& nick, unsigned int s
 	std::sort(scores.begin(), scores.end());
 	std::ofstream file;
 	file.open(bro->stor->getcstr("module.uno.scorefile"), std::ios::out);
-	if (!file) {
-		return; // OH WELL
-	}
-	std::string ch = "";
-	BOOST_FOREACH(Score sc, scores) {
-		if (ch != sc.channel) {
-			ch = sc.channel;
-			file << std::endl << ch;
+	if (file) {
+		std::string ch = "";
+		BOOST_FOREACH(Score sc, scores) {
+			if (ch != sc.channel) {
+				ch = sc.channel;
+				file << std::endl << ch;
+			}
+			file << " " << sc.nick << " " << sc.win_count << " " << sc.total_score;
 		}
-		file << " " << sc.nick << " " << sc.win_count << " " << sc.total_score;
+		file.close();
 	}
-	file.close();
 };
 
 void Uno::onLoad(Brobot* const bro) {
@@ -221,11 +261,11 @@ void Uno::help(Brobot* const bro, const Args& args) {
 void Uno::gameEnd(Brobot* const bro, const Args& args) {
 	if (args[5] != ".endgame" || args[4] != channel)
 		return;
-	if (uno_creator != args[1]) {
+	if (uno_creator == args[1]) {
+		endGame(bro, false);
+	} else {
 		bro->irc->privmsg(channel, "Only "+uno_creator+" can end the game!");
-		return;
 	}
-	endGame(bro, false);
 };
 
 void Uno::playCard(Brobot* const bro, const Args& args) {
@@ -235,224 +275,57 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
 	}
-	unsigned short int h = 0;
-	if (args[5].substr(0,6) == ".play ") {
-		h = 2;
+	static const boost::regex expr("^\\.pl(?:ay)? (?<col>w|[rgby])(?:(?<num>\\d)|(?<typ>\\+4|\\+2|[sr]))? ?(?<wcol>[rgby])?$");
+	boost::smatch match; // col: [rgbyw] num: 0-9 typ: r/s/+2/+4 wcol: [rgby]
+	if (!boost::regex_match(args[5], match, expr)) {
+		bro->irc->privmsg(channel, "What card was that again?");
+		return;
 	}
-	Cardtype color;
-	short int number;
-	switch(args[5][4+h]) {
-		case 'r':
-			color = red;
-			number = boost::lexical_cast<unsigned short int>(args[5][5+h]);
-			break;
-		case 'b':
-			color = blue;
-			number = boost::lexical_cast<unsigned short int>(args[5][5+h]);
-			break;
-		case 'g':
-			color = green;
-			number = boost::lexical_cast<unsigned short int>(args[5][5+h]);
-			break;
-		case 'y':
-			color = yellow;
-			number = boost::lexical_cast<unsigned short int>(args[5][5+h]);
-			break;
-		case 'w':
-			color = none_;
-			number = -1;
-			break;
-		default:
-			bro->irc->privmsg(channel, "What card was that again?");
-			return;
+	Cardtype played_color = strtocol(match["col"]);
+	Cardattr played_attr = strtoattr(match["typ"]);
+	short int played_number;
+	if (match["num"] == "") {
+		played_number = -1;
+	} else {
+		played_number = boost::lexical_cast<unsigned short int>(match["num"]);
 	}
-	if (args[5][5+h] == 'r' || args[5][5+h] == 's' || args[5][5+h] == '+' || number == -1) {
-		if (has_to_draw_cards == 0 && args[5][5+h] == 'r' && (discard.back().type == color || discard.back().attr == reverse)) {
-			Card c(NULL, -1, color, reverse, "");
-			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
-			if (it == current_player->hand.end()) {
-				bro->irc->privmsg(channel, "You don't have that card!");
-				return;
-			}
-			bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
-			printCard(bro, channel, false, *it);
-			discard.push_back(*it);
-			current_player->hand.erase(it);
-			current_player->has_drawn = false;
-			current_player->has_challenged = false;
-			if (current_player->hand.empty()) {
-				endGame(bro, true);
-				return;
-			} else if (current_player->hand.size() == 1) {
-				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
-			}
-			if (players.size() > 2) {
-				reversePlayers();
-				bro->irc->privmsg(channel, "Playing order has been reversed!");
-				nextPlayer();
-				nextTurn(bro);
-			} else {
-				nextPlayer();
-				bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
-				nextPlayer();
-				nextTurn(bro);
-			}
-		} else if (has_to_draw_cards == 0 && args[5][5+h] == 's' && (discard.back().type == color || discard.back().attr == skip)) {
-			Card c(NULL, -1, color, skip, "");
-			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
-			if (it == current_player->hand.end()) {
-				bro->irc->privmsg(channel, "You don't have that card!");
-				return;
-			}
-			bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
-			printCard(bro, channel, false, *it);
-			discard.push_back(*it);
-			current_player->hand.erase(it);
-			current_player->has_drawn = false;
-			current_player->has_challenged = false;
-			has_to_draw_cards = 0;
-			if (current_player->hand.empty()) {
-				endGame(bro, true);
-				return;
-			} else if (current_player->hand.size() == 1) {
-				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
-			}
+	if (played_attr == drawtwo || played_attr == skip || played_attr == reverse)
+		played_number = -1;
+	if (played_color == none_)
+		played_number = -1;
+	if (played_color == none_ && played_attr != drawfour)
+		played_attr = wild;
+	if (played_color != none_ && played_attr == drawfour) {
+		bro->irc->privmsg(channel, "What card was that again?");
+		return;
+	}
+	Card played_card(NULL, played_number, played_color, played_attr, "");
+	if ((played_attr == wild || played_attr == drawfour) && match["wcol"] == "") {
+		bro->irc->privmsg(channel, "You need to choose a color!");
+		return;
+	} else if (played_attr == wild || played_attr == drawfour) {
+		played_card.type = strtocol(match["wcol"]);
+	}
+	std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), played_card);
+	if (it == current_player->hand.end()) {
+		bro->irc->privmsg(channel, "You don't have that card!");
+		return;
+	}
+	if (has_to_draw_cards == 0 && played_card.type != none_ && played_card.attr == none && (discard.back().type == played_color || discard.back().number == played_number)) {
+		pl_card(bro, it);
+		has_to_draw_cards = 0;
+	} else if (has_to_draw_cards == 0 && played_attr == reverse && (discard.back().attr == played_attr || discard.back().type == played_color)) {
+		pl_card(bro, it);
+		has_to_draw_cards = 0;
+		if (players.size() > 2) {
+			reversePlayers();
+			bro->irc->privmsg(channel, "Playing order has been reversed!");
+		} else {
 			nextPlayer();
 			bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
-			nextPlayer();
-			nextTurn(bro);
-		} else if (args[5][4+h] != 'w' && args[5].substr(5+h,2) == "+2" && (discard.back().type == color || discard.back().attr == drawtwo || (discard.back().attr == drawfour && discard.back().type == color))) {
-			Card c(NULL, -1, color, drawtwo, "");
-			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
-			if (it == current_player->hand.end()) {
-				bro->irc->privmsg(channel, "You don't have that card!");
-				return;
-			}
-			bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
-			printCard(bro, channel, false, *it);
-			discard.push_back(*it);
-			current_player->hand.erase(it);
-			current_player->has_drawn = false;
-			current_player->has_challenged = false;
-			has_to_draw_cards += 2;
-			if (current_player->hand.empty()) {
-				endGame(bro, true);
-				return;
-			} else if (current_player->hand.size() == 1) {
-				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
-			}
-			nextPlayer();
-			nextTurn(bro);
-		} else if (args[5][4+h] == 'w' && args[5][5+h] != '+' && has_to_draw_cards == 0) {
-			char ch;
-			if (args[5][5+h] == ' ') {
-				ch = args[5][6+h];
-			} else {
-				ch = args[5][5+h];
-			}
-			Cardtype newcol;
-			switch (ch) {
-				case 'b':
-					newcol = blue;
-					break;
-				case 'r':
-					newcol = red;
-					break;
-				case 'g':
-					newcol = green;
-					break;
-				case 'y':
-					newcol = yellow;
-					break;
-				default:
-					bro->irc->privmsg(channel, "You need to specify a color!");
-					return;
-			}
-			Card c(NULL, -1, none_, wild, "");
-			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
-			if (it == current_player->hand.end()) {
-				bro->irc->privmsg(channel, "You don't have that card!");
-				return;
-			}
-			it->type = newcol;
-			bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
-			printCard(bro, channel, false, *it);
-			discard.push_back(*it);
-			current_player->hand.erase(it);
-			current_player->has_drawn = false;
-			current_player->has_challenged = false;
-			has_to_draw_cards = 0;
-			if (current_player->hand.empty()) {
-				endGame(bro, true);
-				return;
-			} else if (current_player->hand.size() == 1) {
-				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
-			}
-			nextPlayer();
-			nextTurn(bro);
-		} else if (args[5].substr(4+h,3) == "w+4" && args[5].size() >= 8) {
-			char ch;
-			if (args[5][7+h] == ' ') {
-				ch = args[5][8+h];
-			} else {
-				ch = args[5][7+h];
-			}
-			Cardtype newcol;
-			switch (ch) {
-				case 'b':
-					newcol = blue;
-					break;
-				case 'r':
-					newcol = red;
-					break;
-				case 'g':
-					newcol = green;
-					break;
-				case 'y':
-					newcol = yellow;
-					break;
-				default:
-					bro->irc->privmsg(channel, "You need to specify a color!");
-					return;
-			}
-			Card c(NULL, -1, none_, drawfour, "");
-			std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
-			if (it == current_player->hand.end()) {
-				bro->irc->privmsg(channel, "You don't have that card!");
-				return;
-			}
-			it->type = newcol;
-			bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
-			printCard(bro, channel, false, *it);
-			discard.push_back(*it);
-			current_player->hand.erase(it);
-			current_player->has_drawn = false;
-			current_player->has_challenged = false;
-			has_to_draw_cards += 4;
-			if (current_player->hand.empty()) {
-				endGame(bro, true);
-				return;
-			} else if (current_player->hand.size() == 1) {
-				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
-			}
-			nextPlayer();
-			nextTurn(bro);
-		} else {
-			bro->irc->privmsg(channel, "You can't play that card!");
 		}
-	} else if (has_to_draw_cards == 0 && discard.back().type == color || discard.back().number == number) {
-		Card c(NULL, number, color, none, "");
-		std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), c);
-		if (it == current_player->hand.end()) {
-			bro->irc->privmsg(channel, "You don't have that card!");
-			return;
-		}
-		bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
-		printCard(bro, channel, false, *it);
-		discard.push_back(*it);
-		current_player->hand.erase(it);
-		current_player->has_drawn = false;
-		current_player->has_challenged = false;
+	} else if (has_to_draw_cards == 0 && played_attr == skip && (discard.back().attr == played_attr || discard.back().type == played_color)) {
+		pl_card(bro, it);
 		has_to_draw_cards = 0;
 		if (current_player->hand.empty()) {
 			endGame(bro, true);
@@ -461,10 +334,30 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 			bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
 		}
 		nextPlayer();
-		nextTurn(bro);
+		bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
+	} else if (played_attr == drawtwo && (discard.back().attr == played_attr || discard.back().type == played_color || (discard.back().attr == drawfour && discard.back().type == played_color))) {
+		pl_card(bro, it);
+		has_to_draw_cards += 2;
+	} else if (has_to_draw_cards == 0 && played_attr == wild) {
+		pl_card(bro, it);
+		has_to_draw_cards = 0;
+		discard.back().type = played_card.type;
+	} else if (played_attr == drawfour) {
+		pl_card(bro, it);
+		has_to_draw_cards += 4;
+		discard.back().type = played_card.type;
 	} else {
 		bro->irc->privmsg(channel, "You can't play that card!");
+		return;
 	}
+	if (current_player->hand.empty()) {
+		endGame(bro, true);
+		return;
+	} else if (current_player->hand.size() == 1) {
+		bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
+	}
+	nextPlayer();
+	nextTurn(bro);
 };
 
 void Uno::challenge(Brobot* const bro, const Args& args) {
@@ -813,7 +706,7 @@ void Uno::startGame(Brobot* const bro, const Args& args) {
 	turntimer.restart();
 	current_player = players.begin();
 	std::string pstring;
-	BOOST_FOREACH( Player p, players)
+	BOOST_FOREACH(Player p, players)
 		pstring += p.nick+" ";
 	bro->irc->privmsg(args[4], "Playing order: "+pstring);
 	discard.push_back(deck.back());
