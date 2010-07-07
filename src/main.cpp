@@ -34,7 +34,7 @@ int main(int argc, char** argv, char** env) {
 		g_bro->loadMod("Uno", &unomod);
 		g_bro->start();
 	} catch (std::exception& e) {
-		std::cerr << "Exception: " << e.what() << '\n';
+		//std::cerr << "Exception: " << e.what() << '\n';
 	}
 	return 0;
 };
