@@ -2,7 +2,6 @@
 #define CORE_H_INCLUDED
 
 #include "BaseModule.h"
-#include "Args.h"
 #include "brobot.h"
 #include <map>
 #include <vector>

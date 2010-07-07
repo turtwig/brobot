@@ -6,7 +6,6 @@
 #include "SSLSocket.h"
 
 #include "Storage.h" // manages the flatfile backend (basically a wrapper around std::map<std::string, std::string>, used for config file
-#include "Args.h" // Used to pass a variable number of arguments to callbacks
 #include "BaseModule.h"
 
 #include <map> // Used for hooks
@@ -22,9 +21,9 @@
 /* Hooks
  * They need to take a Brobot* argument and a
  * Args& argument.
+ * Args is a typedef to std::vector<std::string>
  * access is done by args[0]...args[n]
- * which differ for each hook (no bounds checking)
- * you can also use BOOST_FOREACH on args.vect()
+ * which differ for each hook
  *
  * Please notice that Brobot automatically
  * binds the Brobot& argument, thus only
@@ -46,6 +45,8 @@
   */
 
 class IRC; // Declaration for use of friend in Brobot
+
+typedef std::vector<std::string> Args;
 
 class Brobot : private boost::noncopyable {
 	BaseSocket* sock; // is a pointer so we can use either a normal Socket or a SSLSocket (both inheriting from BaseSocket)
@@ -93,5 +94,8 @@ class Brobot : private boost::noncopyable {
 };
 
 #include "IRC.h" // member functions for easy IRC control, must be included after Brobot due to proper type qualifications
+
+inline std::vector<std::string>& operator%(std::vector<std::string>& vec, const char* string) { vec.push_back(string); return vec; };
+inline std::vector<std::string>& operator%(std::vector<std::string>& vec, const std::string& string) { vec.push_back(string); return vec; };
 
 #endif // BROBOT_H_INCLUDED

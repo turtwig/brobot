@@ -407,7 +407,7 @@ jpegmain(int argc, char **argv, char **envp)
         }
 
         //fputs(ptoc_geteol(), stdout);
-		g_bro->irc->privmsg("#spic", line);
+		g_bro->irc->privmsg("#711chan", line);
 
         if (config.pause > 0)
             sleep(config.pause);

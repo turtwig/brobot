@@ -226,10 +226,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\include\Args.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\BaseModule.h"
 				>
 			</File>

@@ -9,7 +9,6 @@
 #include <sstream>
 #include <boost/timer.hpp> // for turn timer
 #include "BaseModule.h"
-#include "Args.h"
 #include "brobot.h"
 
 extern void ascii(Brobot* bot, Args& args);

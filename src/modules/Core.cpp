@@ -45,8 +45,9 @@ void CoreModule::numerics(Brobot* bro, const std::string& str) {
 	if (str.substr(delim1, delim2-delim1).find_first_of("0123456789") == std::string::npos) // no numbers
 		return; // nothing else to do
 	size_t argsDelim = str.find(' ', delim2+1)+1;
-	Args arg;
-	bro->runHooks("Numeric" + str.substr(delim1, delim2-delim1), arg % str.substr(argsDelim, std::string::npos));
+	Args arg(1);
+	arg % str.substr(argsDelim, std::string::npos);
+	bro->runHooks("Numeric" + str.substr(delim1, delim2-delim1), arg);
 };
 
 /* Handles most user commands
@@ -65,8 +66,9 @@ void CoreModule::commands(Brobot* bro, const std::string& str) {
 		return; // nothing else to do
 	if (match[4] == "PART")
 		return;
-	Args arg;
-	bro->runHooks("On" + match[4], arg % str % match[1] % match[2] % match[3] % match[5] % match[6]);
+	Args arg(6);
+	arg % str % match[1] % match[2] % match[3] % match[5] % match[6];
+	bro->runHooks("On" + match[4], arg);
 };
 
 /* Handles nick changes
@@ -78,8 +80,9 @@ void CoreModule::nick(Brobot* bro, const std::string& str) {
 	boost::cmatch match;
 	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
 		return; // nothing else to do
-	Args arg;
-	bro->runHooks("OnNICK", arg % str % match[1] % match[4] % match[2] % match[3]);
+	Args arg(5);
+	arg % str % match[1] % match[4] % match[2] % match[3];
+	bro->runHooks("OnNICK", arg);
 };
 
 /* Handles join/parts
@@ -91,21 +94,23 @@ void CoreModule::joinpart(Brobot* bro, const std::string& str) {
 	boost::cmatch match;
 	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
 		return; // nothing else to do
-	Args arg;
-	bro->runHooks("On"+match[4], arg % str % match[1] % match[2] % match[3] % match[5] % match[7]);
+	Args arg(6);
+	arg % str % match[1] % match[2] % match[3] % match[5] % match[7];
+	bro->runHooks("On"+match[4], arg);
 };
 
 /* Handles quits
  * Hook is OnQUIT
- * a[0] is the raw string, a[1] is the nick, a[2] is the ident, a[3] is the hostmask, a[2] is the quit message
+ * a[0] is the raw string, a[1] is the nick, a[2] is the ident, a[3] is the hostmask, a[4] is the quit message
  */
 void CoreModule::quit(Brobot* bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) QUIT :(.+?)$"); // matches NICK!IDENT@HOST QUIT :MESSAGE
 	boost::cmatch match;
 	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
 		return; // nothing else to do
-	Args arg;
-	bro->runHooks("OnQUIT", arg % str % match[1] % match[2] % match[3] % match[4]);
+	Args arg(5);
+	arg % str % match[1] % match[2] % match[3] % match[4];
+	bro->runHooks("OnQUIT", arg);
 };
 
 /* Handles PING
@@ -115,8 +120,9 @@ void CoreModule::quit(Brobot* bro, const std::string& str) {
 void CoreModule::ping(Brobot* bro, const std::string& str) {
 	if (str.substr(0,4) != "PING")
 		return; //nothing else to do
-	Args arg;
-	bro->runHooks("OnPING", arg % str.substr(5, std::string::npos));
+	Args arg(1);
+	arg % str.substr(5, std::string::npos);
+	bro->runHooks("OnPING", arg);
 };
 
 // Responds to PING
