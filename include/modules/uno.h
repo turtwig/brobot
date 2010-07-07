@@ -11,7 +11,7 @@
 #include "BaseModule.h"
 #include "brobot.h"
 
-extern void ascii(Brobot* bot, Args& args);
+extern void ascii(Brobot* bot, const Args& args);
 
 class Uno : public BaseModule {
 	enum Cardtype { none_, red, blue, green, yellow };
@@ -21,7 +21,7 @@ class Uno : public BaseModule {
 		Cardtype type;
 		Cardattr attr;
 		std::string ascii[14];
-		Card(Brobot* bro, short int num, Cardtype col, Cardattr spec, const std::string& fname);
+		Card(Brobot* const bro, short int num, Cardtype col, Cardattr spec, const std::string& fname);
 		bool operator==(const Card& c) { return (number == c.number && type == c.type && attr == c.attr) || ((number == c.number) && (number == -1) && (attr == c.attr) && (attr == wild)) ||
 												((number == c.number) && (number == -1) && (attr == c.attr) && (attr == drawfour)); };
 	};
@@ -61,34 +61,34 @@ class Uno : public BaseModule {
 	void reversePlayers();
 	void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
 	void swapDecks() { Card currdiscard = discard.back(); discard.pop_back(); deck.swap(discard); random_shuffle(deck.begin(), deck.end()); discard.push_back(currdiscard); };
-	void printCard(Brobot* bro, const std::string& target, bool notice, const Card& card);
-	void printCard(Brobot* bro, const std::string& target, bool notice, std::vector<Card> cards);
-	void nextTurn(Brobot* bro);
-	void endGame(Brobot* bro, bool updatescore);
-	void updateScore(Brobot* bro, const std::string& nick, unsigned int score);
+	void printCard(Brobot* const bro, const std::string& target, bool notice, const Card& card);
+	void printCard(Brobot* const bro, const std::string& target, bool notice, std::vector<Card> cards);
+	void nextTurn(Brobot* const bro);
+	void endGame(Brobot* const bro, bool updatescore);
+	void updateScore(Brobot* const bro, const std::string& nick, unsigned int score);
 	public:
-	Uno(Brobot* bro);
-	void onLoad(Brobot* bro);
-	void onUnload(Brobot* bro);
+	Uno(Brobot* const bro);
+	void onLoad(Brobot* const bro);
+	void onUnload(Brobot* const bro);
 	// Hooks
-	void gameStart(Brobot* bro, Args& args);
-	void help(Brobot* bro, Args& args);
-	void showScores(Brobot* bro, Args& args);
-	void joinHook(Brobot* bro, Args& args);
-	void listPlayers(Brobot* bro, Args& args);
-	void nickHook(Brobot* bro, Args& args);
-	void partHook(Brobot* bro, Args& args);
-	void quitHook(Brobot* bro, Args& args);
-	void dropPlayer(Brobot* bro, Args& args);
-	void gameEnd(Brobot* bro, Args& args);
-	void startGame(Brobot* bro, Args& args);
-	void showDiscard(Brobot* bro, Args& args);
-	void passTurn(Brobot* bro, Args& args);
-	void drawCard(Brobot* bro, Args& args);
-	void showHand(Brobot* bro, Args& args);
-	void playCard(Brobot* bro, Args& args);
-	void challenge(Brobot* bro, Args& args);
-	void skipTurn(Brobot* bro, Args& args);
+	void gameStart(Brobot* const bro, const Args& args);
+	void help(Brobot* const bro, const Args& args);
+	void showScores(Brobot* const bro, const Args& args);
+	void joinHook(Brobot* const bro, const Args& args);
+	void listPlayers(Brobot* const bro, const Args& args);
+	void nickHook(Brobot* const bro, const Args& args);
+	void partHook(Brobot* const bro, const Args& args);
+	void quitHook(Brobot* const bro, const Args& args);
+	void dropPlayer(Brobot* const bro, const Args& args);
+	void gameEnd(Brobot* const bro, const Args& args);
+	void startGame(Brobot* const bro, const Args& args);
+	void showDiscard(Brobot* const bro, const Args& args);
+	void passTurn(Brobot* const bro, const Args& args);
+	void drawCard(Brobot* const bro, const Args& args);
+	void showHand(Brobot* const bro, const Args& args);
+	void playCard(Brobot* const bro, const Args& args);
+	void challenge(Brobot* const bro, const Args& args);
+	void skipTurn(Brobot* const bro, const Args& args);
 };
 
 #endif // UNO_H_INCLUDED

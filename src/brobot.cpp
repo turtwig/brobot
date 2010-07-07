@@ -25,7 +25,7 @@ void Brobot::start() {
 	}
 };
 
-void Brobot::hook(const std::string& name, const std::string& hook, boost::function<void (Args&)> func) {
+void Brobot::hook(const std::string& name, const std::string& hook, boost::function<void (const Args&)> func) {
 	 callbacks[hook][name] = func; // overwrites the existing hook (if any).
 };
 
@@ -33,8 +33,8 @@ void Brobot::unhook(const std::string& name, const std::string& hook) {
 	hooks_to_unhook.push_back(std::make_pair(name, hook)); // add hooks to the list of hooks to be unhooked on next runHooks
 };
 
-void Brobot::runHooks(const std::string& hook, Args& arg) {
-	typedef std::pair<std::string, boost::function<void (Args&)> > penis_t;
+void Brobot::runHooks(const std::string& hook, const Args& arg) {
+	typedef std::pair<std::string, boost::function<void (const Args&)> > penis_t;
 	if (callbacks.find(hook) == callbacks.end())
 		return; // no such hook map
 	typedef std::pair<std::string, std::string> unhook_t;
@@ -99,7 +99,7 @@ std::vector<std::string> Brobot::listMods() {
 std::map<std::string, std::vector<std::string> > Brobot::listHooks() {
 	std::map<std::string, std::vector<std::string> > map;
 	typedef std::pair<std::string, callback_map_t> pair_t;
-	typedef std::pair<std::string, boost::function<void (Args&)> > penis_t;
+	typedef std::pair<std::string, boost::function<void (const Args&)> > penis_t;
 	BOOST_FOREACH(pair_t pair1, callbacks) {
 		BOOST_FOREACH(penis_t pair2, pair1.second) {
 			map[pair1.first].push_back(pair2.first);

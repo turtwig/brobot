@@ -1,7 +1,7 @@
 #include "brobot.h"
 #include <fstream>
 
-void ascii(Brobot* bot, Args& args) {
+void ascii(Brobot* bot, const Args& args) {
 	// args[0] = raw line
 	// args[1] = nick
 	// args[2] = ident
@@ -37,7 +37,7 @@ void ascii(Brobot* bot, Args& args) {
 
 extern int jpegmain(int argc, char **argv, char **envp);
 
-void jpegchat(Brobot* bro, Args& args) {
+void jpegchat(Brobot* const bro, const Args& args) {
 	if (args[5] != ".jpegtochat")
 		return;
 	char* dicks[] = { "jpegtochat.exe", "-c", "mirc", "-d", "none", "-x", "80", "-y", "100", "file.jpg" };

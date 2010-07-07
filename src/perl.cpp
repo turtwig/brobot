@@ -1,11 +1,10 @@
 #include <boost/foreach.hpp>
-#include <iostream>
 #include "brobot.h"
 #include "broperl.h"
 
 EXTERN_C void xs_init (pTHX); // From perlxsi.c
 
-void PerlTest(Brobot* bro, Args& args) {
+void PerlTest(Brobot* const bro, const Args& args) {
 	char *embedding[] = { "", "-e", "0" };
 	if (args[5].substr(0,6) == ".init ") {
 		my_perl = perl_alloc();

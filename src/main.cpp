@@ -1,4 +1,3 @@
-#include <iostream>
 #include <cstdlib>
 #include <ctime>
 #include "brobot.h"
@@ -8,9 +7,9 @@
 
 Brobot* g_bro;
 
-extern void ascii(Brobot* bot, Args& args);
-extern void jpegchat(Brobot* bro, Args& args);
-extern void PerlTest(Brobot* bro, Args& args);
+extern void ascii(Brobot* bot, const Args& args);
+extern void jpegchat(Brobot* const bro, const Args& args);
+extern void PerlTest(Brobot* const bro, const Args& args);
 
 int main(int argc, char** argv, char** env) {
 	std::srand(std::time(NULL));

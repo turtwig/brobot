@@ -19,15 +19,15 @@
 #include <boost/noncopyable.hpp>
 
 /* Hooks
- * They need to take a Brobot* argument and a
- * Args& argument.
+ * They need to take a Brobot* const argument and a
+ * const Args& argument.
  * Args is a typedef to std::vector<std::string>
  * access is done by args[0]...args[n]
  * which differ for each hook
  *
- * Please notice that Brobot automatically
- * binds the Brobot& argument, thus only
- * passes the Args.
+ * Please notice that you should bind the
+ * Brobot* argument, thus only
+ * the Args have to be passed.
  */
 
  /* Modules
@@ -53,7 +53,7 @@ class Brobot : private boost::noncopyable {
 	boost::asio::ssl::context& context; // Used for SSL (even if SSL is disabled)
 	boost::asio::io_service& io_service;
 
-	typedef std::map<std::string, boost::function<void (Args&)> > callback_map_t; // map holding various elements, each having a name and a function
+	typedef std::map<std::string, boost::function<void (const Args&)> > callback_map_t; // map holding various elements, each having a name and a function
 	std::map<std::string, callback_map_t> callbacks; // the actual map of callbacks. each element points to an ``event''. each element points to a callback_map_t
 
 	std::map<std::string, BaseModule*> modules; // map of modules (name, module*) is a pointer for polymorphism
@@ -69,9 +69,9 @@ class Brobot : private boost::noncopyable {
 
 	void start(); // main bot loop, connects and parses shit.
 
-	void hook(const std::string& name, const std::string& hook, boost::function<void (Args&)> func);
+	void hook(const std::string& name, const std::string& hook, boost::function<void (const Args&)> func);
 	void unhook(const std::string& name, const std::string& hook);
-	void runHooks(const std::string& hook, Args& arg);
+	void runHooks(const std::string& hook, const Args& arg);
 	std::map<std::string, std::vector<std::string> > listHooks();
 
 	bool loadMod(const std::string& name, BaseModule* module);
@@ -95,7 +95,7 @@ class Brobot : private boost::noncopyable {
 
 #include "IRC.h" // member functions for easy IRC control, must be included after Brobot due to proper type qualifications
 
-inline std::vector<std::string>& operator%(std::vector<std::string>& vec, const char* string) { vec.push_back(string); return vec; };
-inline std::vector<std::string>& operator%(std::vector<std::string>& vec, const std::string& string) { vec.push_back(string); return vec; };
+inline Args& operator%(Args& arg, const char* string) { arg.push_back(string); return arg; };
+inline Args& operator%(Args& arg, const std::string& string) { arg.push_back(string); return arg; };
 
 #endif // BROBOT_H_INCLUDED

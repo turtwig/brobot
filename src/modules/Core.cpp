@@ -1,6 +1,6 @@
 #include "modules/Core.h"
 
-void CoreModule::onLoad(Brobot* bro) {
+void CoreModule::onLoad(Brobot* const bro) {
 	// Parser functions
 	bro->addParser("ping", boost::bind(&CoreModule::ping, this, bro, _1));
 	bro->addParser("numerics", boost::bind(&CoreModule::numerics, this, bro, _1));
@@ -17,7 +17,7 @@ void CoreModule::onLoad(Brobot* bro) {
 	bro->hook("[core] ModuleLoad", "OnPRIVMSG", boost::bind(&CoreModule::moduleload, this, bro, _1));
 };
 
-void CoreModule::onUnload(Brobot* bro) {
+void CoreModule::onUnload(Brobot* const bro) {
 	// Parser functions
 	bro->delParser("commands");
 	bro->delParser("numerics");
@@ -39,13 +39,13 @@ void CoreModule::onUnload(Brobot* bro) {
  * It forwards the text (after the nick argument) the numeric sends
  * including (or not) the : before it.
  */
-void CoreModule::numerics(Brobot* bro, const std::string& str) {
+void CoreModule::numerics(Brobot* const bro, const std::string& str) {
 	size_t delim1 = str.find(' ');
 	size_t delim2 = str.find(' ', ++delim1);
 	if (str.substr(delim1, delim2-delim1).find_first_of("0123456789") == std::string::npos) // no numbers
 		return; // nothing else to do
 	size_t argsDelim = str.find(' ', delim2+1)+1;
-	Args arg(1);
+	Args arg;
 	arg % str.substr(argsDelim, std::string::npos);
 	bro->runHooks("Numeric" + str.substr(delim1, delim2-delim1), arg);
 };
@@ -59,14 +59,14 @@ void CoreModule::numerics(Brobot* bro, const std::string& str) {
  * a[3] the host ,a[4] the target and
  * a[5] the actual message.
  */
-void CoreModule::commands(Brobot* bro, const std::string& str) {
+void CoreModule::commands(Brobot* const bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) (\\S+?) (\\S+?) :(.+?)$"); // matches :NICK!IDENT@HOST COMMAND TARGET :MESSAGE
 	boost::cmatch match;
 	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
 		return; // nothing else to do
 	if (match[4] == "PART")
 		return;
-	Args arg(6);
+	Args arg;
 	arg % str % match[1] % match[2] % match[3] % match[5] % match[6];
 	bro->runHooks("On" + match[4], arg);
 };
@@ -75,12 +75,12 @@ void CoreModule::commands(Brobot* bro, const std::string& str) {
  * Hook is OnNICK
  * a[0] is the raw string, a[1] is the original nick, a[2] is the new nick, a[3] is the ident, a[4] is the host
  */
-void CoreModule::nick(Brobot* bro, const std::string& str) {
+void CoreModule::nick(Brobot* const bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) NICK :(\\S+?)$"); // matches NICK!IDENT@HOST NICK :NEWNICK
 	boost::cmatch match;
 	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
 		return; // nothing else to do
-	Args arg(5);
+	Args arg;
 	arg % str % match[1] % match[4] % match[2] % match[3];
 	bro->runHooks("OnNICK", arg);
 };
@@ -89,12 +89,12 @@ void CoreModule::nick(Brobot* bro, const std::string& str) {
  * Hook is OnJOIN/OnPART
  * a[0] is the raw string, a[1] is the nick, a[2] is the ident, a[3] is the host, a[4] is the channel, a[5] is the part message (if any)
  */
-void CoreModule::joinpart(Brobot* bro, const std::string& str) {
+void CoreModule::joinpart(Brobot* const bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) (JOIN|PART) :?(#\\S+?)( :(.+?))?$"); // matches NICK!IDENT@HOST JOIN|PART :?#CHANNEL
 	boost::cmatch match;
 	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
 		return; // nothing else to do
-	Args arg(6);
+	Args arg;
 	arg % str % match[1] % match[2] % match[3] % match[5] % match[7];
 	bro->runHooks("On"+match[4], arg);
 };
@@ -103,12 +103,12 @@ void CoreModule::joinpart(Brobot* bro, const std::string& str) {
  * Hook is OnQUIT
  * a[0] is the raw string, a[1] is the nick, a[2] is the ident, a[3] is the hostmask, a[4] is the quit message
  */
-void CoreModule::quit(Brobot* bro, const std::string& str) {
+void CoreModule::quit(Brobot* const bro, const std::string& str) {
 	static const boost::regex expr("^:(\\S+?)!(\\S+?)@(\\S+?) QUIT :(.+?)$"); // matches NICK!IDENT@HOST QUIT :MESSAGE
 	boost::cmatch match;
 	if (!boost::regex_match(str.c_str(), match, expr)) // we did not get a match
 		return; // nothing else to do
-	Args arg(5);
+	Args arg;
 	arg % str % match[1] % match[2] % match[3] % match[4];
 	bro->runHooks("OnQUIT", arg);
 };
@@ -117,21 +117,21 @@ void CoreModule::quit(Brobot* bro, const std::string& str) {
  * fires hook OnPING.
  * single argument is the text to PONG back
  */
-void CoreModule::ping(Brobot* bro, const std::string& str) {
+void CoreModule::ping(Brobot* const bro, const std::string& str) {
 	if (str.substr(0,4) != "PING")
 		return; //nothing else to do
-	Args arg(1);
+	Args arg;
 	arg % str.substr(5, std::string::npos);
 	bro->runHooks("OnPING", arg);
 };
 
 // Responds to PING
-void CoreModule::pingHook(Brobot* bro, Args& arg) {
+void CoreModule::pingHook(Brobot* const bro, const Args& arg) {
 	bro->irc->raw("PONG " + arg[0]); // simply respond to the PING
 };
 
 // Runs the raw commands in brobot.conf starting from core.onconnnect.0 up to however much needed
-void CoreModule::onconnect(Brobot* bro, Args& arg) {
+void CoreModule::onconnect(Brobot* const bro, const Args& arg) {
 	if (bro->stor->get("core.oper.login") != "" && bro->stor->get("core.oper.password") != "") { // we can oper up
 		bro->irc->oper(bro->stor->get("core.oper.login"), bro->stor->get("core.oper.password"));
 	}
@@ -154,7 +154,7 @@ void CoreModule::module(const std::string& name, BaseModule* mod) {
 	all_mods[name] = mod; // add module to list of modules that can be loaded
 };
 
-void CoreModule::modulelist(Brobot* bro, Args& args) {
+void CoreModule::modulelist(Brobot* const bro, const Args& args) {
 	if (args[5] != ".modlist" || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
 		return;
 	std::string target;
@@ -168,7 +168,7 @@ void CoreModule::modulelist(Brobot* bro, Args& args) {
 		bro->irc->privmsg(target, " * "+mod);
 };
 
-void CoreModule::hooklist(Brobot* bro, Args& args) {
+void CoreModule::hooklist(Brobot* const bro, const Args& args) {
 	if (args[5] != ".hooklist" || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
 		return;
 	std::string target;
@@ -186,7 +186,7 @@ void CoreModule::hooklist(Brobot* bro, Args& args) {
 	}
 };
 
-void CoreModule::moduleunload(Brobot* bro, Args& args) {
+void CoreModule::moduleunload(Brobot* const bro, const Args& args) {
 	if (args[5].substr(0,11) != ".modunload " || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
 		return;
 	std::string target;
@@ -203,7 +203,7 @@ void CoreModule::moduleunload(Brobot* bro, Args& args) {
 	}
 };
 
-void CoreModule::moduleload(Brobot* bro, Args& args) {
+void CoreModule::moduleload(Brobot* const bro, const Args& args) {
 	if (args[5].substr(0,9) != ".modload " || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
 		return;
 	std::string target;

@@ -14,22 +14,22 @@ class CoreModule : public BaseModule {
 	public:
 	void module(const std::string& name, BaseModule* mod);
 	// Brobot stuff:
-	void onLoad(Brobot* bro);
-	void onUnload(Brobot* bro);
+	void onLoad(Brobot* const bro);
+	void onUnload(Brobot* const bro);
 	// Parsers
-	void numerics(Brobot* bro, const std::string& str);
-	void commands(Brobot* bro, const std::string& str);
-	void nick(Brobot* bro, const std::string& str);
-	void joinpart(Brobot* bro, const std::string& str);
-	void quit(Brobot* bro, const std::string& str);
-	void ping(Brobot* bro, const std::string& str);
+	void numerics(Brobot* const bro, const std::string& str);
+	void commands(Brobot* const bro, const std::string& str);
+	void nick(Brobot* const bro, const std::string& str);
+	void joinpart(Brobot* const bro, const std::string& str);
+	void quit(Brobot* const bro, const std::string& str);
+	void ping(Brobot* const bro, const std::string& str);
 	// Hooks
-	void onconnect(Brobot* bro, Args& arg);
-	void pingHook(Brobot* bro, Args& arg);
-	void modulelist(Brobot* bro, Args& args);
-	void hooklist(Brobot* bro, Args& args);
-	void moduleunload(Brobot* bro, Args& args);
-	void moduleload(Brobot* bro, Args& args);
+	void onconnect(Brobot* const bro, const Args& arg);
+	void pingHook(Brobot* const bro, const Args& arg);
+	void modulelist(Brobot* const bro, const Args& args);
+	void hooklist(Brobot* const bro, const Args& args);
+	void moduleunload(Brobot* const bro, const Args& args);
+	void moduleload(Brobot* const bro, const Args& args);
 };
 
 #endif // CORE_H_INCLUDED

@@ -10,7 +10,6 @@
 #include <time.h>
 
 #include "brobot.h"
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <vector>
