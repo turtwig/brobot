@@ -1077,7 +1077,7 @@ void Uno::showDiscard(Brobot* const bro, const Args& args) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 };
 
-void Uno::nickHook(Brobot* const bro, const Args& args) {
+void Uno::nickHook(Brobot* const, const Args& args) {
 	if (started == 0)
 		return; // game hasn't started
 	if (uno_creator == args[1])

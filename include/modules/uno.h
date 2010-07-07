@@ -1,5 +1,6 @@
 #ifndef UNO_H_INCLUDED
 #define UNO_H_INCLUDED
+
 #include <string>
 #include <vector>
 #include <fstream>
@@ -76,7 +77,7 @@ class Uno : public BaseModule {
 	void showScores(Brobot* const bro, const Args& args);
 	void joinHook(Brobot* const bro, const Args& args);
 	void listPlayers(Brobot* const bro, const Args& args);
-	void nickHook(Brobot* const bro, const Args& args);
+	void nickHook(Brobot* const, const Args& args);
 	void partHook(Brobot* const bro, const Args& args);
 	void quitHook(Brobot* const bro, const Args& args);
 	void dropPlayer(Brobot* const bro, const Args& args);
