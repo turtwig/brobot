@@ -732,7 +732,7 @@ void Uno::challenge(Brobot* const bro, const Args& args) {
 	}
 	bool invalid = false;
 	BOOST_FOREACH(Card c, it->hand) {
-		if (c.type == (discard.end()-2)->type) {
+		if (c.type == (discard.end()-2)->type && c.attr != wild && c.attr != drawfour) {
 			invalid = true;
 			break;
 		}
