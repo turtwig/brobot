@@ -198,6 +198,7 @@ void Uno::help(Brobot* const bro, const Args& args) {
 	bro->irc->privmsg(args[4], "Syntax for .play is: .play [rgby][0-9] (i.e. r1, b5, g6)");
 	bro->irc->privmsg(args[4], "                           Special cards: r+2, rs, rr");
 	bro->irc->privmsg(args[4], "                           Wild and Wild+4s: w [rgby], w+4 [rgby] to specify a color");
+	bro->irc->privmsg(args[4], "                           If you have two regular cards with the same face value, play them at once like so: r4 r4");
 	bro->irc->privmsg(args[4], "If you drop from a game you cannot re-join it.");
 };
 // Handles game creation
@@ -795,8 +796,13 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 		return;
 	}
 	static const boost::regex expr("^\\.pl(?:ay)? (?<col>w|[rgby])(?:(?<num>\\d)|(?<typ>\\+4|\\+2|[sr]))? ?(?<wcol>[rgby])?$");
+	static const boost::regex doubles_expr("^\\.pl(?:ay)? (?<col>[rgby])(?<num>\\d) ?\\1\\2$");
 	boost::smatch match; // col: [rgbyw] num: 0-9 typ: r/s/+2/+4 wcol: [rgby]
-	if (!boost::regex_match(args[5], match, expr)) {
+	bool doubles = false; // whether the user is playing two cards at once
+	if (boost::regex_match(args[5], match, expr)) {
+	} else if (boost::regex_match(args[5], match, doubles_expr)) {
+		doubles = true;
+	} else {
 		bro->irc->privmsg(channel, "What card was that again?");
 		return;
 	}
@@ -830,9 +836,30 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 		bro->irc->privmsg(channel, "You don't have that card!");
 		return;
 	}
+	if (doubles) {
+		if (std::count(current_player->hand.begin(), current_player->hand.end(), played_card) < 2) {
+			bro->irc->privmsg(channel, "You don't have that card!");
+			return;
+		}
+	}
 	if (has_to_draw_cards == 0 && played_card.type != none_ && played_card.attr == none && (discard.back().type == played_color || discard.back().number == played_number)) {
-		pl_card(bro, it);
-		has_to_draw_cards = 0;
+		if (!doubles) {
+			pl_card(bro, it);
+			has_to_draw_cards = 0;
+		} else {
+			std::vector<Card> played_cards;
+			played_cards.push_back(*it);
+			discard.push_back(*it);
+			current_player->hand.erase(it);
+			it = std::find(current_player->hand.begin(), current_player->hand.end(), played_card);
+			played_cards.push_back(*it);
+			discard.push_back(*it);
+			current_player->hand.erase(it);
+			bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
+			printCard(bro, channel, false, played_cards);
+			current_player->has_drawn = false;
+			current_player->has_challenged = false;
+		}
 	} else if (has_to_draw_cards == 0 && played_attr == reverse && (discard.back().attr == played_attr || discard.back().type == played_color)) {
 		pl_card(bro, it);
 		has_to_draw_cards = 0;

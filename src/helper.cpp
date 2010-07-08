@@ -31,7 +31,6 @@ void ascii(Brobot* bot, const Args& args) {
 	while (!file.eof()) {
 		std::getline(file, line);
 		bot->irc->privmsg(target, line);
-		line.clear();
 	}
 };
 
