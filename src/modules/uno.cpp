@@ -852,12 +852,15 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 		bro->irc->privmsg(channel, "What card was that again?");
 		return;
 	}
+	std::string mwcol(match["wcol"]);
+	if (played_attr == wild && match["typ"] == "r" && mwcol == "") // incorrect parsing
+		mwcol = "r";
 	Card played_card(NULL, played_number, played_color, played_attr, "");
-	if ((played_attr == wild || played_attr == drawfour) && match["wcol"] == "") {
+	if ((played_attr == wild || played_attr == drawfour) && mwcol == "") {
 		bro->irc->privmsg(channel, "You need to choose a color!");
 		return;
 	} else if (played_attr == wild || played_attr == drawfour) {
-		played_card.type = strtocol(match["wcol"]);
+		played_card.type = strtocol(mwcol);
 	}
 	std::vector<Card>::iterator it = std::find(current_player->hand.begin(), current_player->hand.end(), played_card);
 	if (it == current_player->hand.end()) {
