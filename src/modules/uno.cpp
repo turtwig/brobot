@@ -116,7 +116,7 @@ void Uno::reversePlayers() {
 	current_player = players.begin();
 };
 // Uno constructor, defines cards, loads score
-Uno::Uno(Brobot* const bro) : started(0), has_to_draw_cards(0),
+Uno::Uno(Brobot* const bro) : started(0), has_to_draw_cards(0), locked(false),
 						_0red(bro, 0, red, none, "0red.txt"), _1red(bro, 1, red, none, "1red.txt"), _2red(bro, 2, red, none, "2red.txt"), _3red(bro, 3, red, none, "3red.txt"),
 						_4red(bro, 4, red, none, "4red.txt"), _5red(bro, 5, red, none, "5red.txt"), _6red(bro, 6, red, none, "6red.txt"), _7red(bro, 7, red, none, "7red.txt"),
 						_8red(bro, 8, red, none, "8red.txt"), _9red(bro, 9, red, none, "9red.txt"), _p2red(bro, -1, red, drawtwo, "+2red.txt"), _skipred(bro, -1, red, skip, "skipred.txt"),
@@ -178,6 +178,8 @@ void Uno::help(Brobot* const bro, const Args& args) {
 	bro->irc->privmsg(args[4], ".uno                creates a game");
 	bro->irc->privmsg(args[4], ".join               joins the game");
 	bro->irc->privmsg(args[4], ".start              starts a created game");
+	bro->irc->privmsg(args[4], ".lock               lock or unlocks a game");
+	bro->irc->privmsg(args[4], "                    no one can join a locked game");
 	bro->irc->privmsg(args[4], ".endgame            ends a game");
 	bro->irc->privmsg(args[4], ".drop               drops you from the game");
 	bro->irc->privmsg(args[4], ".hand               shows your hand");
@@ -226,6 +228,7 @@ void Uno::gameStart(Brobot* const bro, const Args& args) {
 	bro->hook("[uno] gameEnd", "OnPRIVMSG", boost::bind(&Uno::gameEnd, this, bro, _1));
 	bro->hook("[uno] playCard", "OnPRIVMSG", boost::bind(&Uno::playCard, this, bro, _1));
 	bro->hook("[uno] challenge", "OnPRIVMSG", boost::bind(&Uno::challenge, this, bro, _1));
+	bro->hook("[uno] lockGame", "OnPRIVMSG", boost::bind(&Uno::lockGame, this, bro, _1));
 	bro->hook("[uno] skipTurn", "OnPRIVMSG", boost::bind(&Uno::skipTurn, this, bro, _1));
 	bro->irc->privmsg(args[4], "Starting 4U8N3O12! game in "+args[4]+"!");
 	bro->irc->privmsg(args[4], "Say .join to join in and .start to start the game!");
@@ -365,8 +368,12 @@ void Uno::joinHook(Brobot* const bro, const Args& args) {
 		return;
 	}
 	if (players.size() == 10) {
-		bro->irc->privmsg(args[4], "There are 10 players in "+args[4]+" already!");
+		bro->irc->privmsg(args[4], "There are 10 players in "+args[4]+" already!");
 		bro->irc->privmsg(args[4], "Type .start to start the game!");
+		return;
+	}
+	if (locked && started == 2) {
+		bro->irc->privmsg(args[4], "This game is locked!");
 		return;
 	}
 	Player p(args[1]);
@@ -424,6 +431,7 @@ void Uno::endGame(Brobot* const bro, bool updatescore) {
 		}
 	}
 	started = 0;
+	locked = false;
 	channel.clear();
 	uno_creator.clear();
 	players.clear();
@@ -446,6 +454,7 @@ void Uno::endGame(Brobot* const bro, bool updatescore) {
 	bro->unhook("[uno] gameEnd", "OnPRIVMSG");
 	bro->unhook("[uno] playCard", "OnPRIVMSG");
 	bro->unhook("[uno] challenge", "OnPRIVMSG");
+	bro->unhook("[uno] lockGame", "OnPRIVMSG");
 	bro->unhook("[uno] skipTurn", "OnPRIVMSG");
 };
 // Handles .endgame
@@ -709,6 +718,21 @@ void Uno::showDiscard(Brobot* const bro, const Args& args) {
 	}
 	if (has_to_draw_cards != 0)
 		bro->irc->privmsg(channel, ""+current_player->nick+" must draw "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
+};
+// Handles .lock
+void Uno::lockGame(Brobot* const bro, const Args& args) {
+	if (started != 2 || args[5] != ".lock" || args[4] != channel)
+		return;
+	if (uno_creator == args[1]) {
+		locked = !locked;
+		if (locked) {
+			bro->irc->privmsg(channel, "The game has been locked!");
+		} else {
+			bro->irc->privmsg(channel, "The game has been unlocked!");
+		}
+	} else {
+		bro->irc->privmsg(channel, "Only "+uno_creator+" can lock/unlock the game!");
+	}
 };
 // Handles .challenge
 void Uno::challenge(Brobot* const bro, const Args& args) {

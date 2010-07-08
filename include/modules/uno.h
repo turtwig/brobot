@@ -60,6 +60,7 @@ class Uno : public BaseModule {
 	boost::timer turntimer; // timer before .skip is available
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running
 	unsigned short int has_to_draw_cards; // number of cards to draw in case of +2/+4
+	bool locked;
 	void reversePlayers();
 	void printCard(Brobot* const bro, const std::string& target, bool notice, const Card& card);
 	void printCard(Brobot* const bro, const std::string& target, bool notice, std::vector<Card> cards);
@@ -94,6 +95,7 @@ class Uno : public BaseModule {
 	void drawCard(Brobot* const bro, const Args& args);
 	void showHand(Brobot* const bro, const Args& args);
 	void playCard(Brobot* const bro, const Args& args);
+	void lockGame(Brobot* const bro, const Args& args);
 	void challenge(Brobot* const bro, const Args& args);
 	void skipTurn(Brobot* const bro, const Args& args);
 	void nickHook(Brobot* const, const Args& args);
