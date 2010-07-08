@@ -200,7 +200,7 @@ void Uno::help(Brobot* const bro, const Args& args) {
 	bro->irc->privmsg(args[4], "Syntax for .play is: .play [rgby][0-9] (i.e. r1, b5, g6)");
 	bro->irc->privmsg(args[4], "                           Special cards: r+2, rs, rr");
 	bro->irc->privmsg(args[4], "                           Wild and Wild+4s: w [rgby], w+4 [rgby] to specify a color");
-	bro->irc->privmsg(args[4], "                           If you have two regular cards with the same face value, play them at once like so: r4 r4");
+	bro->irc->privmsg(args[4], "                           If you have two regular cards with the same color and number, play them at once like so: r4 r4");
 	bro->irc->privmsg(args[4], "If you drop from a game you cannot re-join it.");
 };
 // Handles game creation
