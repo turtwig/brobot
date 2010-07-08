@@ -49,25 +49,26 @@ class Uno : public BaseModule {
 		_0green, _1green, _2green, _3green, _4green, _5green, _6green, _7green, _8green, _9green, _p2green, _skipgreen, _reversegreen,
 		_0yellow, _1yellow, _2yellow, _3yellow, _4yellow, _5yellow, _6yellow, _7yellow, _8yellow, _9yellow, _p2yellow, _skipyellow, _reverseyellow,
 		_wild, _p4wild;
-	std::vector<Player> players;
-	std::vector<std::string> dropped_players;
-	std::vector<Card> deck;
-	std::vector<Card> discard;
-	std::string channel;
-	std::string uno_creator;
-	std::vector<Player>::iterator current_player;
-	std::vector<Score> scores;
-	boost::timer turntimer;
+	std::vector<Player> players; // players
+	std::vector<std::string> dropped_players; // people that .drop out
+	std::vector<Card> deck; // deck of cards
+	std::vector<Card> discard; // discard pile
+	std::string channel; // channel the game is on
+	std::string uno_creator; // who created the game
+	std::vector<Player>::iterator current_player; // playing player
+	std::vector<Score> scores; // players' score
+	boost::timer turntimer; // timer before .skip is available
 	unsigned short int started; // 0 = no game running, 1 = game started, players can join, 2 = game running
-	unsigned short int has_to_draw_cards; // number of cards to draw
+	unsigned short int has_to_draw_cards; // number of cards to draw in case of +2/+4
 	void reversePlayers();
-	void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
-	void swapDecks() { Card currdiscard = discard.back(); discard.pop_back(); deck.swap(discard); random_shuffle(deck.begin(), deck.end()); discard.push_back(currdiscard); };
 	void printCard(Brobot* const bro, const std::string& target, bool notice, const Card& card);
 	void printCard(Brobot* const bro, const std::string& target, bool notice, std::vector<Card> cards);
 	void nextTurn(Brobot* const bro);
 	void endGame(Brobot* const bro, bool updatescore);
 	void updateScore(Brobot* const bro, const std::string& nick, unsigned int score);
+	// inlines
+	inline void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
+	inline void swapDecks() { Card currdiscard = discard.back(); discard.pop_back(); deck.swap(discard); random_shuffle(deck.begin(), deck.end()); discard.push_back(currdiscard); };
 	inline void pl_card(Brobot* const bro, const std::vector<Card>::iterator& it) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
 		printCard(bro, channel, false, *it);
@@ -86,10 +87,6 @@ class Uno : public BaseModule {
 	void showScores(Brobot* const bro, const Args& args);
 	void joinHook(Brobot* const bro, const Args& args);
 	void listPlayers(Brobot* const bro, const Args& args);
-	void nickHook(Brobot* const, const Args& args);
-	void partHook(Brobot* const bro, const Args& args);
-	void quitHook(Brobot* const bro, const Args& args);
-	void dropPlayer(Brobot* const bro, const Args& args);
 	void gameEnd(Brobot* const bro, const Args& args);
 	void startGame(Brobot* const bro, const Args& args);
 	void showDiscard(Brobot* const bro, const Args& args);
@@ -99,6 +96,10 @@ class Uno : public BaseModule {
 	void playCard(Brobot* const bro, const Args& args);
 	void challenge(Brobot* const bro, const Args& args);
 	void skipTurn(Brobot* const bro, const Args& args);
+	void nickHook(Brobot* const, const Args& args);
+	void partHook(Brobot* const bro, const Args& args);
+	void quitHook(Brobot* const bro, const Args& args);
+	void dropPlayer(Brobot* const bro, const Args& args);
 };
 
 #endif // UNO_H_INCLUDED
