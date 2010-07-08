@@ -721,8 +721,12 @@ void Uno::showDiscard(Brobot* const bro, const Args& args) {
 };
 // Handles .lock
 void Uno::lockGame(Brobot* const bro, const Args& args) {
-	if (started != 2 || args[5] != ".lock" || args[4] != channel)
+	if (args[5] != ".lock" || args[4] != channel)
 		return;
+	if (started != 2) {
+		bro->irc->privmsg(channel, "The game hasn't started yet!");
+		return;
+	}
 	if (uno_creator == args[1]) {
 		locked = !locked;
 		if (locked) {
