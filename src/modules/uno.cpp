@@ -959,7 +959,8 @@ void Uno::partHook(Brobot* const bro, const Args& args) {
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
 		if (it->nick == uno_creator && ((players.size() >= 3 && started == 2) || (players.size() >= 2 && started == 1))) {
-			nextPlayer();
+			if (current_player->nick == uno_creator)
+				nextPlayer();
 			uno_creator = current_player->nick;
 			bro->irc->privmsg(channel, ""+uno_creator+" is now managing the game!");
 			if (started == 2) {
@@ -989,7 +990,8 @@ void Uno::quitHook(Brobot* const bro, const Args& args) {
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
 		if (it->nick == uno_creator && ((players.size() >= 3 && started == 2) || (players.size() >= 2 && started == 1))) {
-			nextPlayer();
+			if (current_player->nick == uno_creator)
+				nextPlayer();
 			uno_creator = current_player->nick;
 			bro->irc->privmsg(channel, ""+uno_creator+" is now managing the game!");
 			if (started == 2) {
@@ -1019,7 +1021,8 @@ void Uno::dropPlayer(Brobot* const bro, const Args& args) {
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
 		if (it->nick == uno_creator && ((players.size() >= 3 && started == 2) || (players.size() >= 2 && started == 1))) {
-			nextPlayer();
+			if (current_player->nick == uno_creator)
+				nextPlayer();
 			uno_creator = current_player->nick;
 			bro->irc->privmsg(channel, ""+uno_creator+" is now managing the game!");
 			if (started == 2) {
