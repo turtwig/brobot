@@ -381,7 +381,8 @@ void Uno::joinHook(Brobot* const bro, const Args& args) {
 		p.hand.push_back(deck.back());
 		deck.pop_back();
 		if (deck.empty())
-			swapDecks(bro);
+			if (!swapDecks(bro))
+				return;
 	}
 	std::string current_nick = current_player->nick;
 	players.push_back(p);
@@ -401,10 +402,12 @@ void Uno::endGame(Brobot* const bro, bool updatescore) {
 			nextPlayer();
 			bro->irc->privmsg(channel, ""+current_player->nick+" draws "+boost::lexical_cast<std::string>(has_to_draw_cards)+" cards!");
 			for (int i = 0; i < has_to_draw_cards; i++) {
-				current_player->hand.push_back(deck.back());
-				deck.pop_back();
+				if (deck.empty() && discard.size() == 1)
+					break;
 				if (deck.empty())
 					swapDecks(bro);
+				current_player->hand.push_back(deck.back());
+				deck.pop_back();
 			}
 			current_player = std::find(players.begin(), players.end(), winner);
 		}
@@ -589,7 +592,8 @@ void Uno::skipTurn(Brobot* const bro, const Args& args) {
 				drawncards.push_back(deck.back());
 				deck.pop_back();
 				if (deck.empty())
-					swapDecks(bro);
+					if (!swapDecks(bro))
+						return;
 			}
 			current_player->hand.insert(current_player->hand.end(), drawncards.begin(), drawncards.end());
 			has_to_draw_cards = 0;
@@ -604,7 +608,8 @@ void Uno::skipTurn(Brobot* const bro, const Args& args) {
 			bro->irc->privmsg(channel, ""+current_player->nick+" draws a card!");
 			deck.pop_back();
 			if (deck.empty())
-				swapDecks(bro);
+				if (!swapDecks(bro))
+					return;
 			current_player->has_drawn = false;
 			current_player->has_challenged = false;
 			nextPlayer();
@@ -636,7 +641,8 @@ void Uno::drawCard(Brobot* const bro, const Args& args) {
 			drawncards.push_back(deck.back());
 			deck.pop_back();
 			if (deck.empty())
-				swapDecks(bro);
+				if (!swapDecks(bro))
+					return;
 		}
 		bro->irc->notice(args[1], "You have drawn:");
 		printCard(bro, args[1], true, drawncards);
@@ -655,7 +661,8 @@ void Uno::drawCard(Brobot* const bro, const Args& args) {
 		printCard(bro, args[1], true, deck.back());
 		deck.pop_back();
 		if (deck.empty())
-			swapDecks(bro);
+			if (!swapDecks(bro))
+				return;
 		it->has_drawn = true;
 	}
 };
@@ -777,7 +784,8 @@ void Uno::challenge(Brobot* const bro, const Args& args) {
 			drawncards.push_back(deck.back());
 			deck.pop_back();
 			if (deck.empty())
-				swapDecks(bro);
+				if (!swapDecks(bro))
+					return;
 		}
 		bro->irc->notice(it->nick, "You have drawn:");
 		printCard(bro, it->nick, true, drawncards);

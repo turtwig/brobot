@@ -72,16 +72,18 @@ class Uno : public BaseModule {
 		if (++current_player == players.end())
 			current_player = players.begin();
 	};
-	inline void swapDecks(Brobot* const bro) {
-		if (deck.empty() && discard.size() == 1) {
+	inline bool swapDecks(Brobot* const bro) {
+		if (deck.empty() && (discard.size() == 1 || started == 1)) {
 			bro->irc->privmsg(channel, "I ran out of cards! Stop hacking you fucking faggot!");
 			endGame(bro, false);
+			return false;
 		}
 		Card currdiscard = discard.back();
 		discard.pop_back();
 		deck.swap(discard);
 		random_shuffle(deck.begin(), deck.end());
 		discard.push_back(currdiscard);
+		return true;
 	};
 	inline void pl_card(Brobot* const bro, const std::vector<Card>::iterator& it) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
