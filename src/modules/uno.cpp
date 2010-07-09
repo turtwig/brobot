@@ -819,6 +819,8 @@ void Uno::nextTurn(Brobot* const bro) {
 void Uno::playCard(Brobot* const bro, const Args& args) {
 	if (started != 2 || args[5].size() < 6 || (args[5].substr(0,3) != ".pl" || args[5] == ".players") || args[4] != channel)
 		return;
+	if (std::find(players.begin(), players.end(), args[1]) == players.end())
+		return;
 	if (args[1] != current_player->nick) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
