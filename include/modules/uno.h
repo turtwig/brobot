@@ -68,8 +68,19 @@ class Uno : public BaseModule {
 	void endGame(Brobot* const bro, bool updatescore);
 	void updateScore(Brobot* const bro, const std::string& nick, unsigned int score);
 	// inlines
-	inline void nextPlayer() { if (++current_player == players.end()) current_player = players.begin(); };
-	inline void swapDecks() { Card currdiscard = discard.back(); discard.pop_back(); deck.swap(discard); random_shuffle(deck.begin(), deck.end()); discard.push_back(currdiscard); };
+	inline void nextPlayer() {
+		if (++current_player == players.end())
+			current_player = players.begin();
+	};
+	inline void swapDecks(Brobot* const bro) {
+		if (deck.empty() && discard.size() == 1)
+			endGame(bro, false);
+		Card currdiscard = discard.back();
+		discard.pop_back();
+		deck.swap(discard);
+		random_shuffle(deck.begin(), deck.end());
+		discard.push_back(currdiscard);
+	};
 	inline void pl_card(Brobot* const bro, const std::vector<Card>::iterator& it) {
 		bro->irc->privmsg(channel, ""+current_player->nick+" plays:");
 		printCard(bro, channel, false, *it);
