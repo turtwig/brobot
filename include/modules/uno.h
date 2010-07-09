@@ -73,8 +73,10 @@ class Uno : public BaseModule {
 			current_player = players.begin();
 	};
 	inline void swapDecks(Brobot* const bro) {
-		if (deck.empty() && discard.size() == 1)
+		if (deck.empty() && discard.size() == 1) {
+			bro->irc->privmsg(channel, "I ran out of cards! Stop hacking you fucking faggot!");
 			endGame(bro, false);
+		}
 		Card currdiscard = discard.back();
 		discard.pop_back();
 		deck.swap(discard);
