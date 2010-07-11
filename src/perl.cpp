@@ -19,7 +19,7 @@ void PerlTest(Brobot* const bro, const Args& args) {
 		perl_free(my_perl);
 		PERL_SYS_TERM();
 	}
-	if (args[5].substr(0,6) != ".perl ")
+	if (args[5].substr(0,6) != ".perl " || args[4] != "#711chan")
 		return;
 
 	std::string perl_line = "eval {";
