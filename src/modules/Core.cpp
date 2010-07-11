@@ -15,6 +15,7 @@ void CoreModule::onLoad(Brobot* const bro) {
 	bro->hook("[core] HookList", "OnPRIVMSG", boost::bind(&CoreModule::hooklist, this, bro, _1));
 	bro->hook("[core] ModuleUnload", "OnPRIVMSG", boost::bind(&CoreModule::moduleunload, this, bro, _1));
 	bro->hook("[core] ModuleLoad", "OnPRIVMSG", boost::bind(&CoreModule::moduleload, this, bro, _1));
+	bro->hook("[core] HookUnload", "OnPRIVMSG", boost::bind(&CoreModule::hookunload, this, bro, _1));
 };
 
 void CoreModule::onUnload(Brobot* const bro) {
@@ -31,6 +32,7 @@ void CoreModule::onUnload(Brobot* const bro) {
 	bro->unhook("[core] HookList", "OnPRIVMSG");
 	bro->unhook("[core] ModuleUnload", "OnPRIVMSG");
 	bro->unhook("[core] ModuleLoad", "OnPRIVMSG");
+	bro->unhook("[core] HookUnload", "OnPRIVMSG");
 };
 
 /* Calls numeric hooks.
@@ -233,3 +235,26 @@ void CoreModule::moduleload(Brobot* const bro, const Args& args) {
 		}
 	}
 };
+
+/* Warning:
+ * using .unhook on a hook removes the hook
+ * however, there is no way of storing the hook function pointer,
+ * what this means is that any hooks unhooked by .unhook cannot be re-hooked manually
+ * use at your own peril
+ * syntax is: .unhook OnWHATEVER|[Module] HookName
+ */
+void CoreModule::hookunload(Brobot* const bro, const Args& args) {
+	if (args[5].substr(0,8) != ".unhook " || args[1] != bro->stor->get("core.owner.nick") || args[2] != bro->stor->get("core.owner.ident") || args[3] != bro->stor->get("core.owner.host"))
+		return;
+	size_t separator = args[5].find("|");
+	if (separator == std::string::npos)
+		return;
+	std::string target;
+	if (args[4][0] == '#') {
+		target = args[4];
+	} else {
+		target = args[1];
+	}
+	bro->unhook(args[5].substr(separator+1, std::string::npos), args[5].substr(8,separator-8));
+	bro->irc->privmsg(target, "Unhooked "+args[5].substr(8,separator-8)+" "+args[5].substr(separator+1, std::string::npos)+".");
+}

@@ -31,6 +31,7 @@ class CoreModule : public BaseModule {
 	void hooklist(Brobot* const bro, const Args& args);
 	void moduleunload(Brobot* const bro, const Args& args);
 	void moduleload(Brobot* const bro, const Args& args);
+	void hookunload(Brobot* const bro, const Args& args);
 };
 
 #endif // CORE_H_INCLUDED
