@@ -833,8 +833,8 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 		bro->irc->privmsg(channel, "It's not your turn!");
 		return;
 	}
-	static const boost::regex expr("^\\.pl(?:ay)? (?<col>w|[rgby])(?:(?<num>\\d)|(?<typ>\\+4|\\+2|[sr]))? ?(?<wcol>[rgby])?$");
-	static const boost::regex doubles_expr("^\\.pl(?:ay)? (?<col>[rgby])(?<num>\\d) ?\\1\\2$");
+	static const boost::regex expr("^\\.pl(?:ay)? +(?<col>w|[rgby]) *(?:(?<num>\\d)|(?<typ>\\+4|\\+2|[sr]))? *(?<wcol>[rgby])?$");
+	static const boost::regex doubles_expr("^\\.pl(?:ay)? +(?<col>[rgby]) *(?<num>\\d) *\\1 *\\2$");
 	boost::smatch match; // col: [rgbyw] num: 0-9 typ: r/s/+2/+4 wcol: [rgby]
 	bool doubles = false; // whether the user is playing two cards at once
 	if (boost::regex_match(args[5], match, expr)) {

@@ -256,5 +256,5 @@ void CoreModule::hookunload(Brobot* const bro, const Args& args) {
 		target = args[1];
 	}
 	bro->unhook(args[5].substr(separator+1, std::string::npos), args[5].substr(8,separator-8));
-	bro->irc->privmsg(target, "Unhooked "+args[5].substr(8,separator-8)+" "+args[5].substr(separator+1, std::string::npos)+".");
+	bro->irc->privmsg(target, "Unhooked "+args[5].substr(separator+1, std::string::npos)+".");
 }
