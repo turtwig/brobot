@@ -1,10 +1,10 @@
 #ifndef SSLSOCKET_H_INCLUDED
 #define SSLSOCKET_H_INCLUDED
 
-#include "BaseSocket.h"
+#include "Socket.h"
 #include <boost/asio/ssl.hpp>
 
-class SSLSocket : public BaseSocket {
+class SSLSocket : public Socket {
 	boost::asio::ssl::stream<boost::asio::ip::tcp::socket> sock;
 	public:
 	SSLSocket (const char* host, const char* port, boost::asio::io_service& io, boost::asio::ssl::context& context) : sock(io, context) {

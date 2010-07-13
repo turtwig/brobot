@@ -1,7 +1,6 @@
 #ifndef BROBOT_H_INCLUDED
 #define BROBOT_H_INCLUDED
 
-#include "BaseSocket.h" // Basic socket for polymorphic socket <=> sslsocket behavior
 #include "Socket.h"
 #include "SSLSocket.h"
 
@@ -49,7 +48,7 @@ class IRC; // Declaration for use of friend in Brobot
 typedef std::vector<std::string> Args;
 
 class Brobot : private boost::noncopyable {
-	BaseSocket* sock; // is a pointer so we can use either a normal Socket or a SSLSocket (both inheriting from BaseSocket)
+	Socket* sock; // is a pointer so we can use either a normal Socket or a SSLSocket
 	boost::asio::ssl::context& context; // Used for SSL (even if SSL is disabled)
 	boost::asio::io_service& io_service;
 

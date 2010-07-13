@@ -1,35 +1,48 @@
 #ifndef SOCKET_H_INCLUDED
 #define SOCKET_H_INCLUDED
 
-#include "BaseSocket.h"
+#include <string>
+#include <cstring> // for strlen
+#include <boost/asio.hpp>
 
-class Socket : public BaseSocket {
-	boost::asio::ip::tcp::socket sock;
+class Socket : private boost::noncopyable {
+	boost::asio::ip::tcp::socket* sock;
+	protected:
+	boost::asio::ip::tcp::resolver::iterator iterator;
+	boost::asio::streambuf response;
 	public:
-	Socket (const char* host, const char* port, boost::asio::io_service& io) : sock(io) {
+	Socket (const char* host, const char* port, boost::asio::io_service& io) {
+		sock = new boost::asio::ip::tcp::socket(io);
 		boost::asio::ip::tcp::resolver resolver(io);
 		boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), host, port);
 		iterator = resolver.resolve(query);
 	};
 
-	void connect() {
-		sock.connect(*iterator);
+	Socket () : sock (NULL) {};
+
+	~Socket () {
+		if (sock != NULL)
+			delete sock;
 	};
 
-	void close() {
-		sock.close();
+	virtual void connect() {
+		sock->connect(*iterator);
 	};
 
-	void write(const std::string& msg) { // writes msg
-		boost::asio::write(sock, boost::asio::buffer(msg, msg.length()));
+	virtual void close() {
+		sock->close();
 	};
 
-	void write(const char* msg) { // writes msg
-		boost::asio::write(sock, boost::asio::buffer(msg, std::strlen(msg)));
+	virtual void write(const std::string& msg) { // writes msg
+		boost::asio::write(*sock, boost::asio::buffer(msg, msg.length()));
 	};
 
-	std::string read() { // returns a string up to the next '\r\n'. this function only blocks if there is no '\r\n' in the streambuf, otherwise it returns immediately
-		boost::asio::read_until(sock, response, "\r\n");
+	virtual void write(const char* msg) { // writes msg
+		boost::asio::write(*sock, boost::asio::buffer(msg, std::strlen(msg)));
+	};
+
+	virtual std::string read() { // returns a string up to the next '\r\n'. this function only blocks if there is no '\r\n' in the streambuf, otherwise it returns immediately
+		boost::asio::read_until(*sock, response, "\r\n");
 		std::istream tmpis(&response);
 		std::string tmp;
 		std::getline(tmpis, tmp);

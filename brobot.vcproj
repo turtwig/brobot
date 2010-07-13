@@ -232,10 +232,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\BaseSocket.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\brobot.h"
 				>
 			</File>
