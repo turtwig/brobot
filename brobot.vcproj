@@ -220,6 +220,14 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="pokemon"
+					>
+					<File
+						RelativePath=".\src\modules\pokemon\pokemon.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -275,6 +283,14 @@
 					</File>
 					<File
 						RelativePath=".\include\modules\jpegtochat\libptoc.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="pokemon"
+					>
+					<File
+						RelativePath=".\include\modules\pokemon\pokemon.h"
 						>
 					</File>
 				</Filter>

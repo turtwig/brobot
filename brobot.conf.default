@@ -37,3 +37,9 @@ module.uno.dir C:\some\path\leading\to\uno\asciis\
 //module.uno.dir /some/path/
 module.uno.scorefile ../brobot.uno
 // or anywhere else
+// Channel where pokemon is active (can only be one)
+module.pokemon.channel #fags
+// Wherever you want to store pokemon files and trainer data and whatnot
+module.pokemon.basedir ../pokemon/
+// Dir where all the front/back sprites are located
+module.pokemon.asciidir C:\ascii\pokemon\

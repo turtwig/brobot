@@ -3,6 +3,7 @@
 #include "brobot.h"
 #include "modules/Core.h"
 #include "modules/uno.h"
+#include "modules/pokemon/pokemon.h"
 #include "broperl.h"
 
 Brobot* g_bro;
@@ -28,8 +29,10 @@ int main(int argc, char** argv, char** env) {
 		g_bro->hook("PerlTest", "OnPRIVMSG", boost::bind(&PerlTest, g_bro, _1));
 		CoreModule core;
 		Uno uno(g_bro);
+		PokemonModule poke(g_bro);
 		core.module("Core", &core);
 		core.module("Uno", &uno);
+		core.module("Pokémon", &poke);
 		core.loadMods(g_bro);
 		g_bro->start();
 	} catch (std::exception& e) {
