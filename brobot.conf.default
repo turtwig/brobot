@@ -4,8 +4,8 @@ core.port 6697
 // SSL (1 or 0)
 core.ssl 1
 // self-explanatory
-core.nick fagbot
-core.real fag
+core.nick probot
+core.real pro
 core.ident bot
 // don't define if you don't want it to oper up
 core.oper.login oper
