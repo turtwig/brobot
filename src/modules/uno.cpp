@@ -908,6 +908,12 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 			reversePlayers();
 			bro->irc->privmsg(channel, "Playing order has been reversed!");
 		} else {
+			if (current_player->hand.empty()) {
+				endGame(bro, true);
+				return;
+			} else if (current_player->hand.size() == 1) {
+				bro->irc->privmsg(channel, ""+current_player->nick+" has 4U8N3O12!");
+			}
 			nextPlayer();
 			bro->irc->privmsg(channel, ""+current_player->nick+" skips his turn!");
 		}
