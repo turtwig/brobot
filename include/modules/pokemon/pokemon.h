@@ -72,7 +72,9 @@ struct Pokemon {
 	std::string frontfname;
 	std::string backfname;
 	std::string nickname;
-	//Stats stats;
+	unsigned int hp;
+	unsigned int maxhp;
+	unsigned int level;
 	Pokemon(const std::string& fname, const std::string& nick, const unsigned int& mhp, const unsigned int& level) : nickname(nick), hp(mhp), maxhp(mhp), level(level) {
 		frontfname = fname+"front.txt"; backfname = fname+"back.txt";
 	};
