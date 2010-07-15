@@ -64,6 +64,8 @@ poke.h/cpp define the pokemon structure
 PokemonModule is responsible for trainer/pokemon creation
 other renderWhatever functions may be required for rendering other information (such as pokemon left and whatnot)
 also see with faggot if we can get a trainer front/back sprite
+
+^ pedrobear is lonely, true story
 */
 
 struct Pokemon {
