@@ -276,7 +276,7 @@ void Uno::gameStart(Brobot* const bro, const Args& args) {
 };
 // Handles .start
 void Uno::startGame(Brobot* const bro, const Args& args) {
-	if (started != 1 || args[5] != ".start" || args[4] != channel)
+	if (args[5] != ".start" || args[4] != channel)
 		return;
 	if (started == 2) {
 		bro->irc->privmsg(channel, "Game in "+channel+" is already in progress!");
@@ -355,7 +355,7 @@ void Uno::startGame(Brobot* const bro, const Args& args) {
 };
 // Handles .join
 void Uno::joinHook(Brobot* const bro, const Args& args) {
-	if (started == 0 || args[5] != ".join" || args[4] != channel)
+	if (args[5] != ".join" || args[4] != channel)
 		return;
 	std::vector<std::string>::iterator dropit = std::find(dropped_players.begin(), dropped_players.end(), args[1]);
 	if (dropit != dropped_players.end()) {
@@ -544,7 +544,7 @@ void Uno::showScores(Brobot* const bro, const Args& args) {
 };
 // handles .pass
 void Uno::passTurn(Brobot* const bro, const Args& args) {
-	if (started != 2 || (args[5] != ".pass" && args[5] != ".pa") || args[4] != channel)
+	if ((args[5] != ".pass" && args[5] != ".pa") || args[4] != channel || started != 2)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -567,7 +567,7 @@ void Uno::passTurn(Brobot* const bro, const Args& args) {
 };
 // Handles .skip
 void Uno::skipTurn(Brobot* const bro, const Args& args) {
-	if (started != 2 || args[4] != channel || args[5] != ".skip")
+	if (args[5] != ".skip"  || args[4] != channel || started != 2)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -621,7 +621,7 @@ void Uno::skipTurn(Brobot* const bro, const Args& args) {
 };
 // Handles .draw
 void Uno::drawCard(Brobot* const bro, const Args& args) {
-	if (started != 2 || (args[5] != ".draw" && args[5] != ".dr") || args[4] != channel)
+	if ((args[5] != ".draw" && args[5] != ".dr") || args[4] != channel || started != 2)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -668,7 +668,7 @@ void Uno::drawCard(Brobot* const bro, const Args& args) {
 };
 // Handles .hand
 void Uno::showHand(Brobot* const bro, const Args& args) {
-	if (started == 0 || (args[5] != ".hand" && args[5] != ".ha") || args[4] != channel)
+	if ((args[5] != ".hand" && args[5] != ".ha") || args[4] != channel)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -678,7 +678,7 @@ void Uno::showHand(Brobot* const bro, const Args& args) {
 };
 // Handles .players
 void Uno::listPlayers(Brobot* const bro, const Args& args) {
-	if (started == 0 || args[5] != ".players" || args[4] != channel)
+	if (args[5] != ".players" || args[4] != channel)
 		return;
 	std::string pstring;
 	std::vector<Player>::iterator it = current_player;
@@ -699,7 +699,7 @@ void Uno::listPlayers(Brobot* const bro, const Args& args) {
 };
 // Handles .discard
 void Uno::showDiscard(Brobot* const bro, const Args& args) {
-	if (started != 2 || (args[5] != ".discard" && args[5] != ".dc") || args[4] != channel)
+	if ((args[5] != ".discard" && args[5] != ".dc") || args[4] != channel || started != 2)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -747,7 +747,7 @@ void Uno::lockGame(Brobot* const bro, const Args& args) {
 };
 // Handles .challenge
 void Uno::challenge(Brobot* const bro, const Args& args) {
-	if (started != 2 || args[5] != ".challenge" || args[4] != channel)
+	if (args[5] != ".challenge" || args[4] != channel || started != 2)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it == players.end())
@@ -825,7 +825,7 @@ void Uno::nextTurn(Brobot* const bro) {
 };
 // Handles .play
 void Uno::playCard(Brobot* const bro, const Args& args) {
-	if (started != 2 || args[5].size() < 6 || (args[5].substr(0,3) != ".pl" || args[5] == ".players") || args[4] != channel)
+	if (args[5].size() < 6 || (args[5].substr(0,3) != ".pl" || args[5] == ".players") || args[4] != channel || started != 2)
 		return;
 	if (std::find(players.begin(), players.end(), args[1]) == players.end())
 		return;
@@ -954,8 +954,6 @@ void Uno::playCard(Brobot* const bro, const Args& args) {
 };
 // Handles players that change nicks
 void Uno::nickHook(Brobot* const, const Args& args) {
-	if (started == 0)
-		return; // game hasn't started
 	if (uno_creator == args[1])
 		uno_creator = args[2];
 	std::vector<std::string>::iterator dropit = std::find(dropped_players.begin(), dropped_players.end(), args[1]);
@@ -967,7 +965,7 @@ void Uno::nickHook(Brobot* const, const Args& args) {
 };
 // Handles players that PART
 void Uno::partHook(Brobot* const bro, const Args& args) {
-	if (started == 0 || args[4] != channel)
+	if (args[4] != channel)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
@@ -998,8 +996,6 @@ void Uno::partHook(Brobot* const bro, const Args& args) {
 };
 // Handles players that QUIT
 void Uno::quitHook(Brobot* const bro, const Args& args) {
-	if (started == 0)
-		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
 		bro->irc->privmsg(channel, ""+args[1]+" has left the game!");
@@ -1029,7 +1025,7 @@ void Uno::quitHook(Brobot* const bro, const Args& args) {
 };
 // Handles .drop
 void Uno::dropPlayer(Brobot* const bro, const Args& args) {
-	if (started == 0 || args[5] != ".drop" || args[4] != channel)
+	if (args[5] != ".drop" || args[4] != channel)
 		return;
 	std::vector<Player>::iterator it = std::find(players.begin(), players.end(), args[1]);
 	if (it != players.end()) {
