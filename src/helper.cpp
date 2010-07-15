@@ -32,7 +32,6 @@ void ascii(Brobot* bot, const Args& args) {
 		std::getline(file, line);
 		bot->irc->privmsg(target, line);
 	}
-	bot->irc->privmsg(target, "(ps: internets is pro)");
 };
 
 extern int jpegmain(int argc, char **argv, char **envp);
