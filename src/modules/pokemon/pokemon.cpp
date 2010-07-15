@@ -15,10 +15,10 @@ void PokemonModule::onUnload(Brobot* const bro) {
 };
 
 void PokemonModule::testF(Brobot* const bro, const Args& args) {
-	if (args[4] != channel || args[5] != ".poke")
+	if (args[4] != channel || args[5].substr(0, 6) != ".poke ")
 		return;
-	Pokemon front("bulbasaur", "cocksucker ", 30, 5);
-	Pokemon back("bulbasaur", "faggot<3   ", 555, 55);
+	Pokemon front(args[5].substr(6, std::string::npos), "cocksucker ", 30, 5);
+	Pokemon back(args[5].substr(6, std::string::npos), "faggot<3   ", 555, 55);
 	front.hp = 10;
 	back.hp = 55;
 	BOOST_FOREACH(std::string s, renderBattle(front, back))
@@ -84,7 +84,7 @@ std::vector<std::string> PokemonModule::renderBattle(const Pokemon& front, const
 	for (i = 0; i < 3; ++i) {
 		screen.push_back(btoppadding);
 	}
-	BOOST_FOREACH(std::string hpline, renderHP(back)) {
+	BOOST_FOREACH(std::string hpline, renderHP(front)) {
 		hpline = "0,0XXXXXXXXXXXXXXXXXXXXXXX"+hpline+"XXXXXXXXXXXXXXX";
 		screen.push_back(hpline);
 	}
@@ -106,7 +106,7 @@ std::vector<std::string> PokemonModule::renderBattle(const Pokemon& front, const
 	for (; i < screen.size()-6; ++i) {
 		screen[i] += fbotpadding;
 	}
-	BOOST_FOREACH(std::string hpline, renderHP(front)) {
+	BOOST_FOREACH(std::string hpline, renderHP(back)) {
 		hpline = "0,0XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"+hpline+"XXXXXXXXXXXXXXXXXXXXXXX";
 		screen[i++] += hpline;
 	}

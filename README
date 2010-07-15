@@ -6,3 +6,5 @@ links against perl boost openssl and libjpeg
 you also might need to do some ghetto shit like getting a windows getopt port or something
 
 shoutz to aempirei for writing jpegtochat shit owns
+
+also in case you didn't realize even if you were to get this to compile all the cool features require data files that are not provided with brobot good luck getting your hand on them
