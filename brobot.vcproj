@@ -224,7 +224,19 @@
 					Name="pokemon"
 					>
 					<File
+						RelativePath=".\include\modules\pokemon\attack.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\include\modules\pokemon\poke.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\src\modules\pokemon\pokemon.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\include\modules\pokemon\trainer.cpp"
 						>
 					</File>
 				</Filter>
@@ -290,7 +302,27 @@
 					Name="pokemon"
 					>
 					<File
+						RelativePath=".\include\modules\pokemon\attack.h"
+						>
+					</File>
+					<File
+						RelativePath=".\include\modules\pokemon\poke.h"
+						>
+					</File>
+					<File
 						RelativePath=".\include\modules\pokemon\pokemon.h"
+						>
+					</File>
+					<File
+						RelativePath=".\include\modules\pokemon\stats.h"
+						>
+					</File>
+					<File
+						RelativePath=".\include\modules\pokemon\trainer.h"
+						>
+					</File>
+					<File
+						RelativePath=".\include\modules\pokemon\types.h"
 						>
 					</File>
 				</Filter>

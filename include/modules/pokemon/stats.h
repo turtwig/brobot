@@ -1,0 +1,7 @@
+#ifndef POKEMON_STATS_H_INCLUDED
+#define POKEMON_STATS_H_INCLUDED
+
+struct PokeStats {
+};
+
+#endif // POKEMON_STATS_H_INCLUDED
