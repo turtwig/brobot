@@ -25,7 +25,7 @@ class CoreModule : public BaseModule {
 	void quit(Brobot* const bro, const std::string& str);
 	void ping(Brobot* const bro, const std::string& str);
 	// Hooks
-	void onconnect(Brobot* const bro, const Args& arg);
+	void onconnect(Brobot* const bro, const Args&);
 	void pingHook(Brobot* const bro, const Args& arg);
 	void modulelist(Brobot* const bro, const Args& args);
 	void hooklist(Brobot* const bro, const Args& args);

@@ -84,7 +84,7 @@ class PokemonModule : public BaseModule {
 	std::string channel, stordir, asciidir;
 	std::vector<std::string> renderHP(const Pokemon& p); // renders HP bar
 	std::vector<std::string> renderBattle(const Pokemon& front, const Pokemon& back); // renders entire battle scene (including hp bars)
-	std::vector<std::string> renderMessage(const std::vector<std::string>& messages, bool actionBox); // renders the message box portion of the screen, if actionBox is true, it renders the right-hand size action selector
+	std::vector<std::string> renderMessage(std::string m1, std::string m2, bool actionBox); // renders the message box portion of the screen, if actionBox is true, it renders the right-hand size action selector
 	public:
 	PokemonModule(Brobot* const bro);
 	void onLoad(Brobot* const bro);

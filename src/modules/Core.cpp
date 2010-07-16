@@ -133,7 +133,7 @@ void CoreModule::pingHook(Brobot* const bro, const Args& arg) {
 };
 
 // Runs the raw commands in brobot.conf starting from core.onconnnect.0 up to however much needed
-void CoreModule::onconnect(Brobot* const bro, const Args& arg) {
+void CoreModule::onconnect(Brobot* const bro, const Args&) {
 	if (bro->stor->get("core.oper.login") != "" && bro->stor->get("core.oper.password") != "") { // we can oper up
 		bro->irc->oper(bro->stor->get("core.oper.login"), bro->stor->get("core.oper.password"));
 	}

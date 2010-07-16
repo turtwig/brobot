@@ -23,6 +23,8 @@ void PokemonModule::testF(Brobot* const bro, const Args& args) {
 	back.hp = 55;
 	BOOST_FOREACH(std::string s, renderBattle(front, back))
 		bro->irc->privmsg(channel, s);
+	BOOST_FOREACH(std::string s, renderMessage("I AM SO FUCKING GAY", "THOUGH SERIOUSLY WHAT WILL COCKSUCKER DO", true))
+		bro->irc->privmsg(channel, s);
 };
 
 std::vector<std::string> PokemonModule::renderHP(const Pokemon& p) {
@@ -48,7 +50,7 @@ std::vector<std::string> PokemonModule::renderHP(const Pokemon& p) {
 		barcolor = 4;
 	}
 	std::string l = "1,1X"+boost::lexical_cast<std::string>(barcolor)+","+boost::lexical_cast<std::string>(barcolor);
-	double i;
+	unsigned short int i;
 	for (i = 0; i < (int)(((double)p.hp/(double)p.maxhp)*20.0); ++i) {
 		l += "X";
 	}
@@ -59,11 +61,11 @@ std::vector<std::string> PokemonModule::renderHP(const Pokemon& p) {
 	l += "1,1X0,0";
 	hpbar.push_back(l);
 	std::string hpline = "1,1XX0,01"+boost::lexical_cast<std::string>(p.hp)+"1,1";
-	for (int j = 8; j > boost::lexical_cast<std::string>(p.hp).size(); --j) {
+	for (unsigned short int j = 8; j > boost::lexical_cast<std::string>(p.hp).size(); --j) {
 		hpline += "X";
 	}
 	hpline += "0,1/1,1";
-	for (int j = 8; j > boost::lexical_cast<std::string>(p.maxhp).size(); --j) {
+	for (unsigned short int j = 8; j > boost::lexical_cast<std::string>(p.maxhp).size(); --j) {
 		hpline += "X";
 	}
 	hpline += "0,01"+boost::lexical_cast<std::string>(p.maxhp)+"1,1XXX0,0";
@@ -114,4 +116,46 @@ std::vector<std::string> PokemonModule::renderBattle(const Pokemon& front, const
 		screen[i] += fbotpadding;
 	}
 	return screen;
+};
+
+std::vector<std::string> PokemonModule::renderMessage(std::string m1, std::string m2, bool actionBox) {
+	std::vector<std::string> msg;
+	if (!actionBox) {
+		if (m1.size() > 90 || m2.size() > 90)
+			return msg;
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0,0XX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		m1 += "0,0";
+		for (unsigned short int i = 90; 90 > m1.size(); ++i)
+			m1 += 'X';
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XX0,0XX1,0"+m1+"XX1,1XX0,0XX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		m2 += "0,0";
+		for (unsigned short int i = 90; 90 > m2.size(); ++i)
+			m2 += 'X';
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XX0,0XX1,0"+m2+"XX1,1XX0,0XX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0,0XX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	} else {
+		if (m1.size() > 70 || m2.size() > 70)
+			return msg;
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0,0XX1,1XXXXXXXXXXXXXXXXXX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XX0,0XXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0,0XX1,1XX0,0XX1,1XX0,0X1,0FIGHT0,0XX1,0PKMN0,0XX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		m1 += "0,0";
+		for (unsigned short int i = 70; 70 > m1.size(); ++i)
+			m1 += 'X';
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XX0,0XX1,0"+m1+"XX1,1XX0,0XX1,1XX0,0XX1,1XX0,0XXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		m2 += "0,0";
+		for (unsigned short int i = 70; 70 > m2.size(); ++i)
+			m2 += 'X';
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XX0,0XX1,0"+m2+"XX1,1XX0,0XX1,1XX0,0XX1,1XX0,0XX1,0ITEM0,0XXX1,0RUN0,0XX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0,0XX1,1XX0,0XX1,1XX0,0XXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XX0,0XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX1,1XX0,0XX1,1XXXXXXXXXXXXXXXXXX0,0XXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXX1,1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0,0XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		msg.push_back("0,0XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	}
+	return msg;
 };
