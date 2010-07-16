@@ -224,11 +224,11 @@
 					Name="pokemon"
 					>
 					<File
-						RelativePath=".\include\modules\pokemon\attack.cpp"
+						RelativePath=".\src\modules\pokemon\attack.cpp"
 						>
 					</File>
 					<File
-						RelativePath=".\include\modules\pokemon\poke.cpp"
+						RelativePath=".\src\modules\pokemon\poke.cpp"
 						>
 					</File>
 					<File
@@ -236,7 +236,7 @@
 						>
 					</File>
 					<File
-						RelativePath=".\include\modules\pokemon\trainer.cpp"
+						RelativePath=".\src\modules\pokemon\trainer.cpp"
 						>
 					</File>
 				</Filter>
