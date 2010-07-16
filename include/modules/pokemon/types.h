@@ -1,6 +1,8 @@
 #ifndef POKEMON_TYPES_H_INCLUDED
 #define POKEMON_TYPES_H_INCLUDED
 
+#include <limits>
+
 namespace pokemon {
 	enum Type { none, normal, fight, flying, poison, ground, rock, bug, ghost, steel, fire, water, grass, electric, psychic, ice, dragon, dark };
 
@@ -52,13 +54,13 @@ namespace pokemon {
 
 	float TypeModifier(const Type& a, const Type& def1, const Type& def2) {
 		if (a == none || (def1 == none && def2 == none))
-			return NaN;
+			return std::numeric_limits<float>::quiet_NaN();
 		return types_internal::t(a, def1) * types_internal::t(a, def2);
 	};
 
 	inline float SameTypeBonus(const Type& a, const Type& t1, const Type& t2) {
 		if (a == none || (t1 == none && t2 == none))
-			return NaN;
+			return std::numeric_limits<float>::quiet_NaN();
 		if (t1 == a || t2 == a) {
 			return 1.5;
 		} else {
